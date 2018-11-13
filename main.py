@@ -35,7 +35,7 @@ def __main__():
     epg_matched = match_tele(channels, epg_raw)
     programms_xmltv = programms_to_xmltv(epg_matched)
     channels_xmltv = channels_to_xmltv(channels)
-    with open('xmltv_tele.xml', 'w+') as w:
+    with open('tv7_epg.xml', 'w+') as w:
         w.write("<?xml version=\"1.0\" encoding=\"UTF-8\" ?><tv>" +
                 channels_xmltv + programms_xmltv + "</tv>")
 
