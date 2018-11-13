@@ -31,7 +31,7 @@ class programm_item:
 def __main__():
     channels = get_channel_list()
     channels = prepare_channel_list(channels)
-    epg_raw = download_in_days(14)
+    epg_raw = download_in_days(7)
     epg_matched = match_tele(channels, epg_raw)
     programms_xmltv = programms_to_xmltv(epg_matched)
     channels_xmltv = channels_to_xmltv(channels)
