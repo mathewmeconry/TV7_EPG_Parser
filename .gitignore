@@ -1,0 +1,5 @@
+__pycache__/
+.vscode/
+xmltv_tele.gz
+xmltv_tele.xml
+xmltv_tele.xml.gz
