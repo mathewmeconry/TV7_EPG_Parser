@@ -1,8 +1,11 @@
-# TV7_EPG_Tele.ch_Parser
-Parses tele.ch for the EPG-Information and prepares them for TV7 (Init7) in XMLTV format
+# TV7_EPG_Parser
+Parses tele.ch and teleboy.ch for the EPG-Information and prepares them for TV7 (Init7) in XMLTV format
 
 # Ready XMLTV Files
 https://github.com/mathewmeconry/TV7_EPG_Data
+
+# Matching rate
+~103 channels
 
 ## Contributing
 1. Fork it!
