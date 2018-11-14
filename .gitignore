@@ -1,5 +1,8 @@
 __pycache__/
 .vscode/
-xmltv_tele.gz
-xmltv_tele.xml
-xmltv_tele.xml.gz
+tv7_tele_epg.xml
+tv7_tele_epg.xml.gz
+tv7_teleboy_epg.xml
+tv7_teleboy_epg.xml.gz
+tv7_epg.xml
+tv7_epg.xml.gz

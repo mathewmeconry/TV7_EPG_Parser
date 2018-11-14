@@ -4,6 +4,7 @@ import re
 import datetime
 import html
 from tele import tele
+from teleboy import teleboy
 
 
 class channel_item:
@@ -31,10 +32,29 @@ class programm_item:
 def __main__():
     channels = get_channel_list()
     channels = prepare_channel_list(channels)
-    epg_raw = download_in_days(7)
-    epg_matched = match_tele(channels, epg_raw)
-    programms_xmltv = programms_to_xmltv(epg_matched)
     channels_xmltv = channels_to_xmltv(channels)
+    epg_matched = []
+
+    print("[*] Getting EPG data from tele.ch")
+    tele_raw = tele.get_epg_by_duration(7*24*60)
+    tele_epg = match_tele(channels, tele_raw)
+
+    with open('tv7_tele_epg.xml', 'w+') as w:
+        w.write("<?xml version=\"1.0\" encoding=\"UTF-8\" ?><tv>" +
+                channels_xmltv + programms_to_xmltv(tele_epg) + "</tv>")
+
+    print("[*] Getting EPG data from teleboy.ch")
+    teleboy_raw = teleboy.get_epg_by_duration(7*24*60)
+    teleboy_epg = match_teleboy(channels, teleboy_raw)
+
+    with open('tv7_teleboy_epg.xml', 'w+') as w:
+        w.write("<?xml version=\"1.0\" encoding=\"UTF-8\" ?><tv>" +
+                channels_xmltv + programms_to_xmltv(teleboy_epg) + "</tv>")
+
+    full_epg = []
+    full_epg.extend(tele_epg)
+    full_epg.extend(teleboy_epg)
+    programms_xmltv = programms_to_xmltv(full_epg)
     with open('tv7_epg.xml', 'w+') as w:
         w.write("<?xml version=\"1.0\" encoding=\"UTF-8\" ?><tv>" +
                 channels_xmltv + programms_xmltv + "</tv>")
@@ -54,23 +74,11 @@ def prepare_channel_list(channel_list):
     for channel in channel_list:
         prepared_list.append({
             "display_name": channel,
-            "id": channel.lower().replace("hd", "").replace("(schweiz)", "").replace("ch", "").replace(" ", ""),
+            "id": channel.lower().replace("hd", "").replace("schweiz", "").replace("ch", "").replace("(", "").replace(")", "").replace(" ", ""),
             "lang": "de"
         })
 
     return prepared_list
-
-
-def download_in_days(days):
-    return download_in_hours(days * 24)
-
-
-def download_in_hours(hours):
-    return download_in_minutes(hours * 60)
-
-
-def download_in_minutes(minutes):
-    return tele.get_epg_by_duration(minutes)
 
 
 def find_channel_by_id(id, channel_list):
@@ -82,7 +90,7 @@ def find_channel_by_id(id, channel_list):
 
 
 def match_tele(channel_list, tele_epg):
-    print("[*] Matching " + str(len(tele_epg)) +
+    print("[*] Matching tele.ch / " + str(len(tele_epg)) +
           " programms to " + str(len(channel_list)) + " channels")
     programms = []
     for programm in tele_epg:
@@ -140,6 +148,60 @@ def match_tele(channel_list, tele_epg):
 
             if "productionYearFirst" in programm:
                 programm_matched["date"] = programm["productionYearFirst"]
+
+            programms.append(programm_matched)
+
+    return programms
+
+
+def match_teleboy(channel_list, teleboy_epg):
+    print("[*] Matching teleboy.ch / " + str(len(teleboy_epg)) +
+          " programms to " + str(len(channel_list)) + " channels")
+    programms = []
+    for programm in teleboy_epg:
+        channel_id = programm["station"].lower().replace(
+            "hd", "").replace("schweiz", "").replace("ch", "").replace("(", "").replace(")", "").replace(" ", "")
+
+        # custom id overrides
+        if channel_id == "srf2":
+            channel_id = "srfzwei"
+        elif channel_id == "sat.1gold":
+            channel_id = "sat1gold"
+        elif channel_id == "tvo-dasosterfernsehen":
+            channel_id = "tvo"
+        elif channel_id == "wettertv":
+            channel_id = "wetter.tv"
+        elif channel_id == "wdr":
+            channel_id == "wdrköln"
+        elif channel_id == "telesüdost":
+            channel_id = "tvsüdost"
+
+        if find_channel_by_id(channel_id, channel_list):
+            programm_matched = {
+                "start": programm["begin"],
+                "stop": programm["end"],
+                "channel": channel_id,
+                "icon": programm["image"],
+                "title": programm["title"],
+            }
+
+            if "subtitle" in programm:
+                programm_matched["sub_title"] = programm["subtitle"]
+
+            if "country" in programm:
+                programm_matched["country"] = programm["country"]
+
+            if "desc" in programm:
+                programm_matched["desc"] = programm["desc"]
+
+            if "episode_num" in programm and "season_num" in programm:
+                programm_matched["episode_num"] = "S" + \
+                    str(programm["season_num"]) + " E" + str(programm["episode_num"])
+            elif "episode_num" in programm:
+                programm_matched["episode_num"] = programm["episode_num"]
+
+            if "year" in programm:
+                programm_matched["date"] = programm["year"]
 
             programms.append(programm_matched)
 
