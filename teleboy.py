@@ -58,9 +58,9 @@ class teleboy:
               " until " + end_time.isoformat())
 
         response = requests.get("https://tv.api.teleboy.ch/epg/broadcasts?begin="+start_time.isoformat(
-        )+"&end="+end_time.isoformat()+"&expand=station,logos,flags,primary_image&limit=0&sort=station", headers={"x-teleboy-apikey": "f81a9257b1ab73a7af36b9e0ad43501260fef49c4666db443c8385483982f303"})
+        )+"&end="+end_time.isoformat()+"&expand=station,logos,flags,primary_image&limit=0&sort=station", headers={"x-teleboy-apikey": "6ca99ddb3e659e57bbb9b1874055a711b254425815905abaacf262b64f02eb3d"})
         raw_data = json.loads(response.text)
-
+        print(response.text)
         data = []
         if "data" in raw_data and "items" in raw_data["data"]:
             for item in raw_data["data"]["items"]:
