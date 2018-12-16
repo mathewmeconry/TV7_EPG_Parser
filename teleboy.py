@@ -58,7 +58,7 @@ class teleboy:
               " until " + end_time.isoformat())
 
         response = requests.get("https://tv.api.teleboy.ch/epg/broadcasts?begin="+start_time.isoformat(
-        )+"&end="+end_time.isoformat()+"&expand=station,logos,flags,primary_image&limit=0&sort=station", 
+        )+"&end="+end_time.isoformat()+"&limit=400&expand=station,logos,flags,primary_image&limit=0&sort=station", 
 headers={"x-teleboy-apikey": "6ca99ddb3e659e57bbb9b1874055a711b254425815905abaacf262b64f02eb3d"})
         raw_data = json.loads(response.text)
 
