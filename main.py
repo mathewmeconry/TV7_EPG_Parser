@@ -77,7 +77,7 @@ def prepare_channel_list(channel_list):
             "id": channel.lower().replace("hd", "").replace("schweiz", "").replace("ch", "").replace("(", "").replace(")", "").replace(" ", ""),
             "lang": "de"
         })
-
+        
     return prepared_list
 
 
@@ -112,6 +112,10 @@ def match_tele(channel_list, tele_epg):
             channel_id = "rtl2"
         elif channel_id == "kabeleins":
             channel_id = "kabel1"
+        elif channel_id == "rtsun":
+            channel_Id = "rts1"
+        elif channel_id == "rtsdeux":
+            channel_id = "rts2"
 
         if find_channel_by_id(channel_id, channel_list):
             programm_matched = {
@@ -175,6 +179,10 @@ def match_teleboy(channel_list, teleboy_epg):
             channel_id == "wdrköln"
         elif channel_id == "telesüdost":
             channel_id = "tvsüdost"
+        elif channel_id == "rtsun":
+            channel_Id = "rts1"
+        elif channel_id == "rtsdeux":
+            channel_id = "rts2"
 
         if find_channel_by_id(channel_id, channel_list):
             programm_matched = {
