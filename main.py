@@ -3,8 +3,9 @@ import requests
 import re
 import datetime
 import html
-from tele import tele
-from teleboy import teleboy
+import json
+from epg_sources.tele import tele
+from epg_sources.teleboy import teleboy
 
 
 class channel_item:
@@ -92,34 +93,14 @@ def find_channel_by_id(id, channel_list):
 def match_tele(channel_list, tele_epg):
     print("[*] Matching tele.ch / " + str(len(tele_epg)) +
           " programms to " + str(len(channel_list)) + " channels")
+    mapping = json.loads(open('./mappings/tele.json', 'r').read())
     programms = []
     for programm in tele_epg:
         channel_id = programm["channelLong"].lower().replace(
             "hd", "").replace("schweiz", "").replace("ch", "").replace("(", "").replace(")", "").replace(" ", "")
 
-        # custom id overrides
-        if channel_id == "srf2":
-            channel_id = "srfzwei"
-        elif channel_id == "3plus":
-            channel_id = "3+"
-        elif channel_id == "4plus":
-            channel_id = "4+"
-        elif channel_id == "5plus":
-            channel_id = "5+"
-        elif channel_id == "sat1":
-            channel_id = "sat.1"
-        elif channel_id == "rtlii":
-            channel_id = "rtl2"
-        elif channel_id == "kabeleins":
-            channel_id = "kabel1"
-        elif channel_id == "rtsun":
-            channel_id = "rts1"
-        elif channel_id == "rtsdeux":
-            channel_id = "rts2"
-        elif channel_id == "itv":
-            channel_id = "itv1"
-        elif channel_id == "tveinternational":
-            channel_id = "tveinternacional"
+        if channel_id in mapping:
+            channel_id = mapping[channel_id]
 
         if find_channel_by_id(channel_id, channel_list):
             programm_matched = {
@@ -165,28 +146,14 @@ def match_tele(channel_list, tele_epg):
 def match_teleboy(channel_list, teleboy_epg):
     print("[*] Matching teleboy.ch / " + str(len(teleboy_epg)) +
           " programms to " + str(len(channel_list)) + " channels")
+    mapping = json.loads(open('./mappings/teleboy.json', 'r').read())
     programms = []
     for programm in teleboy_epg:
         channel_id = programm["station"].lower().replace(
             "hd", "").replace("schweiz", "").replace("ch", "").replace("(", "").replace(")", "").replace(" ", "")
 
-        # custom id overrides
-        if channel_id == "srf2":
-            channel_id = "srfzwei"
-        elif channel_id == "sat.1gold":
-            channel_id = "sat1gold"
-        elif channel_id == "tvo-dasosterfernsehen":
-            channel_id = "tvo"
-        elif channel_id == "wettertv":
-            channel_id = "wetter.tv"
-        elif channel_id == "wdr":
-            channel_id == "wdrköln"
-        elif channel_id == "telesüdost":
-            channel_id = "tvsüdost"
-        elif channel_id == "rtsun":
-            channel_id = "rts1"
-        elif channel_id == "rtsdeux":
-            channel_id = "rts2"
+        if channel_id in mapping:
+            channel_id = mapping[channel_id]
 
         if find_channel_by_id(channel_id, channel_list):
             programm_matched = {
