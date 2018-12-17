@@ -116,6 +116,8 @@ def match_tele(channel_list, tele_epg):
             channel_id = "rts1"
         elif channel_id == "rtsdeux":
             channel_id = "rts2"
+        elif channel_id == "itv":
+            channel_id = "itv1"
         elif channel_id == "tveinternational":
             channel_id = "tveinternacional"
 
