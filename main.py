@@ -113,7 +113,7 @@ def match_tele(channel_list, tele_epg):
         elif channel_id == "kabeleins":
             channel_id = "kabel1"
         elif channel_id == "rtsun":
-            channel_Id = "rts1"
+            channel_id = "rts1"
         elif channel_id == "rtsdeux":
             channel_id = "rts2"
 
@@ -180,7 +180,7 @@ def match_teleboy(channel_list, teleboy_epg):
         elif channel_id == "telesüdost":
             channel_id = "tvsüdost"
         elif channel_id == "rtsun":
-            channel_Id = "rts1"
+            channel_id = "rts1"
         elif channel_id == "rtsdeux":
             channel_id = "rts2"
 
