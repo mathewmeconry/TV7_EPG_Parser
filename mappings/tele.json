@@ -9,5 +9,11 @@
     "rtsun": "rts1",
     "rtsdeux": "rts2",
     "itv": "itv1",
-    "tveinternational": "tveinternacional"
+    "tveinternational": "tveinternacional",
+    "bbc one": "bbcone",
+    "rbb": "rbbberlin",
+    "rai1": "rai",
+    "rai2": "raidue",
+    "cnn": "cnninternational",
+    "bbcworldnews": "bbcworldnewseurope"
 }
