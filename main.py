@@ -251,6 +251,10 @@ def channels_to_xmltv(channel_list):
         channel_xml = "<channel id=\"" + channel["id"] + "\">"
         channel_xml = channel_xml + "<display-name lang=\"de\">" + \
             channel["display_name"] + "</display-name>"
+        channel_xml = channel_xml + "<display-name lang=\"fr\">" + \
+            channel["display_name"] + "</display-name>"
+        channel_xml = channel_xml + "<display-name lang=\"it\">" + \
+            channel["display_name"] + "</display-name>"
         channel_xml = channel_xml + "</channel>"
         channels_xml = channels_xml + channel_xml
 
