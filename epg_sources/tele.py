@@ -43,7 +43,7 @@ class tele:
             start_time = datetime.datetime.now()
 
         if not duration:
-            duration = 120
+            duration = tele.max_duration
 
         if duration > tele.max_duration:
             print("Duration too long max is 239 min")
@@ -91,7 +91,7 @@ class tele:
 
     def __enrich_shows__(base_data: Dict[epg_item, epg_item])->Dict[epg_item, epg_item]:
         enriched_data = []
-        print("[*] Enriching " + str(len(base_data)) + " shows")
+        # print("[*] Enriching " + str(len(base_data)) + " shows")
 
         queueLock = threading.Lock()
         workQueue = queue.Queue(0)
@@ -107,7 +107,8 @@ class tele:
 
         # Create new threads
         for threadNum in range(0, 40):
-            thread = teleThread(threadNum, "Thread-"+str(threadNum), workQueue, queueLock, enriched_data)
+            thread = teleThread(threadNum, "Thread-"+str(threadNum),
+                                workQueue, queueLock, enriched_data)
             thread.start()
             threads.append(thread)
 
