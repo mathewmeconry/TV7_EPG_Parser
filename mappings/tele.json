@@ -4,6 +4,7 @@
     "4plus": "4+",
     "5plus": "5+",
     "sat1": "sat.1",
+    "orfeins": "orf1",
     "rtlii": "rtl2",
     "kabeleins": "kabel1",
     "rtsun": "rts1",
@@ -12,8 +13,9 @@
     "tveinternational": "tveinternacional",
     "bbc one": "bbcone",
     "rbb": "rbbberlin",
-    "rai1": "rai",
+    "rai1": "raiuno",
     "rai2": "raidue",
+    "rai3": "raitre",
     "cnn": "cnninternational",
     "bbcworldnews": "bbcworldnewseurope"
 }
