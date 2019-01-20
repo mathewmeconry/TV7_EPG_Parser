@@ -8,6 +8,7 @@ from epg_sources.tele import tele
 from epg_sources.teleboy import teleboy
 from icon_sources.tele import tele as teleicon
 
+
 class channel_item:
     id: str
     lang: str
@@ -31,40 +32,65 @@ class programm_item:
 
 
 def __main__():
+    print("[*] Getting/parsing Init7 tvchannels.m3u playlist")
     channels = get_channel_list()
     channels = prepare_channel_list(channels)
-    epg_matched = []
 
-    print("[*] Getting Icons from tele.ch")
+    print("[*] Getting EPG and icons data from teleboy.ch")
+    teleboy_raw = teleboy.get_epg_by_duration(7*24*60)
+    teleboy_icons = get_teleboy_icons(teleboy_raw)
+    teleboy_icons_matched = match_icons(
+        channels, teleboy_icons, './mappings/teleboy.json')
+    teleboy_epg = match_teleboy_epg(channels, teleboy_raw)
+    print("[✓] Matched " +
+          str(len(teleboy_icons_matched)) + " teleboy.ch icons")
+
+    print("[*] Getting icons data from tele.ch")
     tele_icons = teleicon.get_images()
-    tele_icons_matched = match_tele_icons(channels, tele_icons)
-
-    # generate the xml for the channels
-    channels_xmltv = channels_to_xmltv(channels, tele_icons_matched)
+    tele_icons_matched = match_icons(
+        channels, tele_icons, './mappings/tele.json')
+    print("[✓] Matched " + str(len(tele_icons_matched)) + " tele.ch icons")
 
     print("[*] Getting EPG data from tele.ch")
     tele_raw = tele.get_epg_by_duration(7*24*60)
     tele_epg = match_tele_epg(channels, tele_raw)
 
-    with open('tv7_tele_epg.xml', 'w+') as w:
-        w.write("<?xml version=\"1.0\" encoding=\"UTF-8\" ?><tv>" +
-                channels_xmltv + programms_to_xmltv(tele_epg) + "</tv>")
+    # generate the xml for the channels
+    all_icons = {**tele_icons_matched, **teleboy_icons_matched}
+    print("[✓] Total " + str(len(all_icons)) + " icons")
+    channels_xmltv = channels_to_xmltv(channels, all_icons)
 
-    print("[*] Getting EPG data from teleboy.ch")
-    teleboy_raw = teleboy.get_epg_by_duration(7*24*60)
-    teleboy_epg = match_teleboy_epg(channels, teleboy_raw)
-
+    # generate tv7_teleboy_epg.xml
     with open('tv7_teleboy_epg.xml', 'w+') as w:
         w.write("<?xml version=\"1.0\" encoding=\"UTF-8\" ?><tv>" +
                 channels_xmltv + programms_to_xmltv(teleboy_epg) + "</tv>")
 
+    # generate tv7_tele_epg.xml
+    with open('tv7_tele_epg.xml', 'w+') as w:
+        w.write("<?xml version=\"1.0\" encoding=\"UTF-8\" ?><tv>" +
+                channels_xmltv + programms_to_xmltv(tele_epg) + "</tv>")
+
+    # generate tv7_epg.xml
     full_epg = []
     full_epg.extend(tele_epg)
     full_epg.extend(teleboy_epg)
+
     programms_xmltv = programms_to_xmltv(full_epg)
     with open('tv7_epg.xml', 'w+') as w:
         w.write("<?xml version=\"1.0\" encoding=\"UTF-8\" ?><tv>" +
                 channels_xmltv + programms_xmltv + "</tv>")
+
+
+def get_teleboy_icons(teleboy_raw):
+    icon_links = []
+    for program in teleboy_raw:
+        icon = {}
+        icon['name'] = program['station']
+        icon['src'] = "https://www.teleboy.ch/assets/stations/" + \
+            str(program['stationid']) + "/icon160_light.png"
+        icon_links.append(icon)
+
+    return icon_links
 
 
 def get_channel_list():
@@ -84,12 +110,12 @@ def prepare_channel_list(channel_list):
             "id": channel.lower().replace("hd", "").replace("schweiz", "").replace("ch", "").replace("(", "").replace(")", "").replace(" ", ""),
             "lang": "de"
         })
-        
+
     return prepared_list
 
+
 def gen_channel_id_from_name(channel_name):
-    return channel_name.lower().replace(
-            "hd", "").replace("schweiz", "").replace("ch", "").replace("(", "").replace(")", "").replace(" ", "")
+    return channel_name.lower().replace("hd", "").replace("schweiz", "").replace("ch", "").replace("(", "").replace(")", "").replace(" ", "")
 
 
 def find_channel_by_id(id, channel_list):
@@ -101,10 +127,11 @@ def find_channel_by_id(id, channel_list):
 
 
 def match_tele_epg(channel_list, tele_epg):
-    print("[*] Matching tele.ch EPG-Data / " + str(len(tele_epg)) +
-          " programms to " + str(len(channel_list)) + " channels")
+    print("[*] Matching tele.ch EPG data (" + str(len(tele_epg)) +
+          " programms to " + str(len(channel_list)) + " channels)")
     mapping = json.loads(open('./mappings/tele.json', 'r').read())
     programms = []
+    matched_channels = set()
     for programm in tele_epg:
         channel_id = gen_channel_id_from_name(programm["channelLong"])
 
@@ -112,6 +139,7 @@ def match_tele_epg(channel_list, tele_epg):
             channel_id = mapping[channel_id]
 
         if find_channel_by_id(channel_id, channel_list):
+            matched_channels.add(channel_id)
             programm_matched = {
                 "start": programm["availabilityStartTime"],
                 "stop": programm["availabilityEndTime"],
@@ -149,12 +177,14 @@ def match_tele_epg(channel_list, tele_epg):
 
             programms.append(programm_matched)
 
+    print("[✓] Matched " + str(len(matched_channels)) + " tele.ch channels")
     return programms
 
 
-def match_tele_icons(channel_list, icons):
-    print("[*] Matching tele.ch channel icons / " + str(len(icons)) + " icons to " + str(len(channel_list)) + " channels")
-    mapping = json.loads(open('./mappings/tele.json', 'r').read())
+def match_icons(channel_list, icons, mapping):
+    print("[*] Matching channel icons (" + str(len(icons)) +
+          " icons to " + str(len(channel_list)) + " channels)")
+    mapping = json.loads(open(mapping, 'r').read())
     icons_matched = {}
     for icon in icons:
         channel_id = gen_channel_id_from_name(icon['name'])
@@ -167,11 +197,13 @@ def match_tele_icons(channel_list, icons):
 
     return icons_matched
 
+
 def match_teleboy_epg(channel_list, teleboy_epg):
-    print("[*] Matching teleboy.ch EPG-Data / " + str(len(teleboy_epg)) +
-          " programms to " + str(len(channel_list)) + " channels")
+    print("[*] Matching teleboy.ch EPG data (" + str(len(teleboy_epg)) +
+          " programms to " + str(len(channel_list)) + " channels)")
     mapping = json.loads(open('./mappings/teleboy.json', 'r').read())
     programms = []
+    matched_channels = set()
     for programm in teleboy_epg:
         channel_id = gen_channel_id_from_name(programm["station"])
 
@@ -179,6 +211,8 @@ def match_teleboy_epg(channel_list, teleboy_epg):
             channel_id = mapping[channel_id]
 
         if find_channel_by_id(channel_id, channel_list):
+            matched_channels.add(channel_id)
+
             programm_matched = {
                 "start": programm["begin"],
                 "stop": programm["end"],
@@ -198,7 +232,8 @@ def match_teleboy_epg(channel_list, teleboy_epg):
 
             if "episode_num" in programm and "season_num" in programm:
                 programm_matched["episode_num"] = "S" + \
-                    str(programm["season_num"]) + " E" + str(programm["episode_num"])
+                    str(programm["season_num"]) + " E" + \
+                    str(programm["episode_num"])
             elif "episode_num" in programm:
                 programm_matched["episode_num"] = programm["episode_num"]
 
@@ -207,6 +242,7 @@ def match_teleboy_epg(channel_list, teleboy_epg):
 
             programms.append(programm_matched)
 
+    print("[✓] Matched " + str(len(matched_channels)) + " teleboy.ch channels")
     return programms
 
 
@@ -281,7 +317,7 @@ def channels_to_xmltv(channel_list, icons):
 
         if channel['id'] in icons:
             channel_xml = channel_xml + "<icon src=\"" + \
-            icons[channel['id']] + "\" />"
+                icons[channel['id']] + "\" />"
 
         channel_xml = channel_xml + "</channel>"
         channels_xml = channels_xml + channel_xml
