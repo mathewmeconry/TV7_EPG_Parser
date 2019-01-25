@@ -7,6 +7,7 @@ import json
 from epg_sources.tele import tele
 from epg_sources.teleboy import teleboy
 from icon_sources.tele import tele as teleicon
+from icon_sources.teleboy import teleboy as teleboyicon
 
 
 class channel_item:
@@ -38,7 +39,7 @@ def __main__():
 
     print("[*] Getting EPG and icons data from teleboy.ch")
     teleboy_raw = teleboy.get_epg_by_duration(7*24*60)
-    teleboy_icons = get_teleboy_icons(teleboy_raw)
+    teleboy_icons = teleboyicon.get_images(teleboy_raw)
     teleboy_icons_matched = match_icons(
         channels, teleboy_icons, './mappings/teleboy.json')
     teleboy_epg = match_teleboy_epg(channels, teleboy_raw)
@@ -79,18 +80,6 @@ def __main__():
     with open('tv7_epg.xml', 'w+') as w:
         w.write("<?xml version=\"1.0\" encoding=\"UTF-8\" ?><tv>" +
                 channels_xmltv + programms_xmltv + "</tv>")
-
-
-def get_teleboy_icons(teleboy_raw):
-    icon_links = []
-    for program in teleboy_raw:
-        icon = {}
-        icon['name'] = program['station']
-        icon['src'] = "https://www.teleboy.ch/assets/stations/" + \
-            str(program['stationid']) + "/icon160_light.png"
-        icon_links.append(icon)
-
-    return icon_links
 
 
 def get_channel_list():
