@@ -7,6 +7,11 @@ https://github.com/mathewmeconry/TV7_EPG_Data
 # Matching rate
 ~103 channels
 
+# Discord Server
+This server is used for idea discussions and some small out of topic stuff.  
+Please report issues or complete feature requests with the github [issues](https://github.com/mathewmeconry/TV7_EPG_Parser/issues) feature.  
+https://discord.gg/4FMXY3c
+
 ## Contributing
 1. Fork it!
 2. Create your feature branch: `git checkout -b my-new-feature`
