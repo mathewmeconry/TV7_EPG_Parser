@@ -245,23 +245,23 @@ def programms_to_xmltv(programms):
 
         programm_xml = programm_xml + "<icon src=\""+programm["icon"]+"\" />"
         programm_xml = programm_xml + "<title>" + \
-            html.escape(programm["title"])+"</title>"
+            html.escape(programm["title"] or "")+"</title>"
 
         if "sub_title" in programm:
             programm_xml = programm_xml + "<sub-title>" + \
-                html.escape(programm["sub_title"])+"</sub-title>"
+                html.escape(programm["sub_title"] or "")+"</sub-title>"
 
         if "country" in programm:
             programm_xml = programm_xml + "<country>" + \
-                html.escape(programm["country"])+"</country>"
+                html.escape(programm["country"] or "")+"</country>"
 
         if "category" in programm:
             programm_xml = programm_xml + "<category lang=\"de\">" + \
-                html.escape(programm["category"])+"</category>"
+                html.escape(programm["category"] or "")+"</category>"
 
         if "desc" in programm:
             programm_xml = programm_xml + "<desc lang=\"de\">" + \
-                html.escape(programm["desc"])+"</desc>"
+                html.escape(programm["desc"] or "")+"</desc>"
 
         if "persons" in programm:
             programm_xml = programm_xml + "<credits>"
