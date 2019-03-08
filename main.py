@@ -137,31 +137,31 @@ def match_tele_epg(channel_list, tele_epg):
                 "title": programm["title"],
             }
 
-            if "subtitle" in programm:
+            if "subtitle" in programm and programm["subtitle"]:
                 programm_matched["sub_title"] = programm["subtitle"]
 
-            if "productionCountry" in programm:
+            if "productionCountry" in programm and programm["productionCountry"]:
                 programm_matched["country"] = programm["productionCountry"]
 
-            if "synopsis" in programm:
+            if "synopsis" in programm and programm["synopsis"]:
                 programm_matched["desc"] = programm["synopsis"]
 
-            if "persons" in programm:
+            if "persons" in programm and programm["persons"]:
                 programm_matched["credits"] = programm["persons"]
-                if "cast" in programm["persons"]:
+                if "cast" in programm["persons"] and programm["persons"]["cast"]:
                     programm_matched["credits"]["actors"] = programm["persons"]["cast"]
                     del programm_matched["credits"]["cast"]
 
-            if "category" in programm:
+            if "category" in programm and programm["category"]:
                 programm_matched["category"] = programm["category"]
 
-            if "episode" in programm and "season" in programm:
+            if "episode" in programm and "season" in programm and programm["episode"] and programm["season"]:
                 programm_matched["episode_num"] = "S" + \
                     str(programm["season"]) + " E" + str(programm["episode"])
-            elif "episode" in programm:
+            elif "episode" in programm and programm["episode"]:
                 programm_matched["episode_num"] = programm["episode"]
 
-            if "productionYearFirst" in programm:
+            if "productionYearFirst" in programm and programm["productionYearFirst"]:
                 programm_matched["date"] = programm["productionYearFirst"]
 
             programms.append(programm_matched)
@@ -210,23 +210,23 @@ def match_teleboy_epg(channel_list, teleboy_epg):
                 "title": programm["title"],
             }
 
-            if "subtitle" in programm:
+            if "subtitle" in programm and programm["subtitle"]:
                 programm_matched["sub_title"] = programm["subtitle"]
 
-            if "country" in programm:
+            if "country" in programm and programm["country"]:
                 programm_matched["country"] = programm["country"]
 
-            if "desc" in programm:
+            if "desc" in programm and programm["desc"]:
                 programm_matched["desc"] = programm["desc"]
 
-            if "episode_num" in programm and "season_num" in programm:
+            if "episode_num" in programm and "season_num" in programm and programm["episode_num"] and programm["season_num"]:
                 programm_matched["episode_num"] = "S" + \
                     str(programm["season_num"]) + " E" + \
                     str(programm["episode_num"])
-            elif "episode_num" in programm:
+            elif "episode_num" in programm and programm["episode_num"]:
                 programm_matched["episode_num"] = programm["episode_num"]
 
-            if "year" in programm:
+            if "year" in programm and programm["year"]:
                 programm_matched["date"] = programm["year"]
 
             programms.append(programm_matched)
@@ -245,23 +245,23 @@ def programms_to_xmltv(programms):
 
         programm_xml = programm_xml + "<icon src=\""+programm["icon"]+"\" />"
         programm_xml = programm_xml + "<title>" + \
-            html.escape(programm["title"])+"</title>"
+            html.escape(programm["title"] or "")+"</title>"
 
         if "sub_title" in programm:
             programm_xml = programm_xml + "<sub-title>" + \
-                html.escape(programm["sub_title"])+"</sub-title>"
+                html.escape(programm["sub_title"] or "")+"</sub-title>"
 
         if "country" in programm:
             programm_xml = programm_xml + "<country>" + \
-                html.escape(programm["country"])+"</country>"
+                html.escape(programm["country"] or "")+"</country>"
 
         if "category" in programm:
             programm_xml = programm_xml + "<category lang=\"de\">" + \
-                html.escape(programm["category"])+"</category>"
+                html.escape(programm["category"] or "")+"</category>"
 
         if "desc" in programm:
             programm_xml = programm_xml + "<desc lang=\"de\">" + \
-                html.escape(programm["desc"])+"</desc>"
+                html.escape(programm["desc"] or "")+"</desc>"
 
         if "persons" in programm:
             programm_xml = programm_xml + "<credits>"
