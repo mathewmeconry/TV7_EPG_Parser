@@ -123,26 +123,30 @@ class tele:
         return enriched_data
 
     def __enrich_show__(item)->epg_item:
-        #print("[*] Enriching show " + item["title"] + " (" + item["assetId"] + ")")
-        enrichment_data = json.loads(requests.get(
-            tele.__api__+"/show/"+item["assetId"]).text)[0]
+        # print("[*] Enriching show " + item["title"] + " (" + item["assetId"] + ")")
+        enrichment_data_parsed = json.loads(requests.get(
+            tele.__api__+"/show/"+item["assetId"]).text)
 
-        for attrib in enrichment_data:
-            if attrib == "persons":
-                item["persons"] = {}
-                for person in enrichment_data["persons"]:
-                    if person == "cast":
-                        item["persons"]["cast"] = []
-                        for cast in enrichment_data["persons"]["cast"]:
-                            item["persons"]["cast"].append(cast["actor"])
-                    else:
-                        item["persons"][person] = enrichment_data["persons"][person]
-            elif attrib in ["availabilityStartTime", "availabilityEndTime", "originalStartTime"]:
-                item[attrib] = dateutil.parser.parse(
-                    enrichment_data[attrib])
-            else:
-                item[attrib] = enrichment_data[attrib]
-
+        if len(enrichment_data_parsed) == 1:
+            enrichment_data = enrichment_data_parsed[0]
+            for attrib in enrichment_data:
+                if attrib == "persons":
+                    item["persons"] = {}
+                    for person in enrichment_data["persons"]:
+                        if person == "cast":
+                            item["persons"]["cast"] = []
+                            for cast in enrichment_data["persons"]["cast"]:
+                                item["persons"]["cast"].append(cast["actor"])
+                        else:
+                            item["persons"][person] = enrichment_data["persons"][person]
+                elif attrib in ["availabilityStartTime", "availabilityEndTime", "originalStartTime"]:
+                    item[attrib] = dateutil.parser.parse(
+                        enrichment_data[attrib])
+                else:
+                    item[attrib] = enrichment_data[attrib]
+        else:
+            print('[x] something failed...')
+            print(enrichment_data_parsed)
         return item
 
 
