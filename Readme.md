@@ -7,6 +7,10 @@ https://github.com/mathewmeconry/TV7_EPG_Data
 # Matching rate
 ~103 channels
 
+# Requirements
+- python3
+- modules listed in [requirements.txt](https://github.com/mathewmeconry/TV7_EPG_Parser/blob/master/requirements.txt). (can be installed with `python3 -m pip install -r requirements.txt`)
+
 # Discord Server
 This server is used for idea discussions and some small out of topic stuff.  
 Please report issues or complete feature requests with the github [issues](https://github.com/mathewmeconry/TV7_EPG_Parser/issues) feature.  
