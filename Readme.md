@@ -8,7 +8,7 @@ https://github.com/mathewmeconry/TV7_EPG_Data
 ~103 channels
 
 # Requirements
-- python3
+- python3 >=3.7.3
 - modules listed in [requirements.txt](https://github.com/mathewmeconry/TV7_EPG_Parser/blob/master/requirements.txt). (can be installed with `python3 -m pip install -r requirements.txt`)
 
 # Discord Server
