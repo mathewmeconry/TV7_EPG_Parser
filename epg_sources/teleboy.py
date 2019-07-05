@@ -68,7 +68,7 @@ class teleboy:
             for item in raw_data["data"]["items"]:
                 item_epg = {
                     "subtitle": item["subtitle"],
-                    "image": item["primary_image"]["base_path"],
+                    "image": item["primary_image"]["base_path"] + "raw/" + item["primary_image"]["hash"] + ".jpg",
                     "begin": dateutil.parser.parse(item["begin"]),
                     "end": dateutil.parser.parse(item["end"]),
                     "title": item["title"],
