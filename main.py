@@ -85,12 +85,7 @@ def get_channel_list():
                 else:
                     value = attribute
 
-                if name == "tvg-name":
-                    # removes tld endings in tvg-name
-                    channel_obj["display_name"] = value.split(".")[0]
-                    channel_obj["id"] = channel_obj["display_name"].lower().replace("hd", "").replace(
-                        "schweiz", "").replace("ch", "").replace("(", "").replace(")", "").replace(" ", "")
-                elif name == "group-title":
+                if name == "group-title":
                     channel_obj["lang"] = value
                 elif name == "tvg-logo":
                     channel_obj["icon"] = value
@@ -98,8 +93,8 @@ def get_channel_list():
             # not all channels have tvg-name so do own stuff....
             if "display_name" not in channel_obj:
                 channel_obj["display_name"] = channel.split(", ")[1]
-                channel_obj["id"] = channel_obj["display_name"].lower().replace("hd", "").replace(
-                    "schweiz", "").replace("ch", "").replace("(", "").replace(")", "").replace(" ", "")
+                channel_obj["id"] = gen_channel_id_from_name(
+                    channel_obj["display_name"])
 
             channel_list.append(channel_obj)
 
@@ -171,23 +166,6 @@ def match_tele_epg(channel_list, tele_epg):
 
     print("[✓] Matched " + str(len(matched_channels)) + " tele.ch channels")
     return programms
-
-
-def match_icons(channel_list, icons, mapping):
-    print("[*] Matching channel icons (" + str(len(icons)) +
-          " icons to " + str(len(channel_list)) + " channels)")
-    mapping = json.loads(open(mapping, 'r').read())
-    icons_matched = {}
-    for icon in icons:
-        channel_id = gen_channel_id_from_name(icon['name'])
-
-        if channel_id in mapping:
-            channel_id = mapping[channel_id]
-
-        if find_channel_by_id(channel_id, channel_list):
-            icons_matched[channel_id] = icon['src']
-
-    return icons_matched
 
 
 def match_teleboy_epg(channel_list, teleboy_epg):
