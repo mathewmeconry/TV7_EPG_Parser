@@ -22,22 +22,22 @@ jobs:
             mv tv7_tele_epg.xml TV7_EPG_Data/
             mv tv7_teleboy_epg.xml TV7_EPG_Data/
       - run:
-          name: change working directory
-          command: cd TV7_EPG_Data/
-      - run:
           name: configure git
           command: | 
+            cd TV7_EPG_Data/
             git config user.email "automated@circleci.com"
             git config user.name "CircleCI"
       - run:
           name: compress files 
           command: |
-            gzip tv7_epg.xml
-            gzip tv7_tele_epg.xml
-            gzip tv7_teleboy_epg.xml
+            cd TV7_EPG_Data/
+            gzip -f tv7_epg.xml
+            gzip -f tv7_tele_epg.xml
+            gzip -f tv7_teleboy_epg.xml
       - run:
           name: push stuff
           command: |
+            cd TV7_EPG_Data/
             git add .
             git commit -m "`date`"
             git push
