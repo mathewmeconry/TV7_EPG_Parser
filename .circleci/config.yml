@@ -1,0 +1,79 @@
+version: 2
+jobs:
+  pushData:
+    docker:
+      - image: circleci/python:3
+    working_directory: ~/project
+    environment:
+      BASH_ENV: BASH_ENV
+    steps:
+      - add_ssh_keys
+      - attach_workspace:
+          at: ~/project/
+      - run:
+          name: configure git
+          command: | 
+            git config user.email "automated@circleci.com"
+            git config user.name "CircleCI"
+      - run:
+          name: checkout data repo
+          command: git checkout git@github.com:mathewmeconry/TV7_EPG_Data.git 
+      - run:
+          name: move files
+          command: |
+            mv tv7_epg.xml TV7_EPG_Data/
+            mv tv7_tele_epg.xml TV7_EPG_Data/
+            mv tv7_teleboy_epg.xml TV7_EPG_Data/
+      - run:
+          name: change working directory
+          command: cd TV7_EPG_Data/
+      - run:
+          name: compress files 
+          command: |
+            gzip tv7_epg.xml
+            gzip tv7_tele_epg.xml
+            gzip tv7_teleboy_epg.xml
+      - run:
+          name: push stuff
+          command: |
+            git add .
+            git commit -m "`date`"
+            git push
+  parse:
+    docker:
+      - image: circleci/python:3
+    working_directory: ~/project
+    environment:
+      BASH_ENV: BASH_ENV
+    steps:
+      - checkout
+      - run:
+          name: installing dependencies
+          command: python3 -m pip install -r requirements.txt
+      - run:
+          name: run parser
+          command: python3 main.py    
+          no_output_timeout: 2h
+      - persist_to_workspace:
+          root: .
+          paths:
+            - ./tv7_epg.xml
+            - ./tv7_tele_epg.xml
+            - ./tv7_teleboy_epg.xml
+
+workflows:
+  version: 2
+  cron:
+      triggers:
+        - schedule:
+            cron: "0 0 * * *"
+            filters:
+              branches:
+                only:
+                  - master
+      jobs:
+        - parse
+        - pushData:
+            requires:
+              - parse
+  
