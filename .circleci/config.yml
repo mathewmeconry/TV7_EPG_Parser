@@ -63,6 +63,16 @@ jobs:
 
 workflows:
   version: 2
+  commit:
+    jobs: 
+      - parse:
+          filters:
+            branches:
+              only:
+                - master
+      - pushData:
+          requires:
+            - parse
   cron:
       triggers:
         - schedule:
