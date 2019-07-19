@@ -49,7 +49,10 @@ jobs:
       - checkout
       - run:
           name: installing dependencies
-          command: python3 -m pip install -r requirements.txt
+          command: python3 -m pip install --user -r requirements.txt
+      - run:
+          name: update $PATH
+          command: export PATH="$PATH:~/.local/bin"
       - run:
           name: run parser
           command: python3 main.py    
