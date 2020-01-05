@@ -4,6 +4,7 @@ import math
 import requests
 import json
 from typing import Dict
+import cfscrape
 
 
 class epg_item:
@@ -57,8 +58,8 @@ class teleboy:
     def __download__(start_time: datetime.datetime, end_time: datetime.datetime) -> Dict[epg_item, epg_item]:
         print("[*] Dowloading from " + start_time.isoformat() +
               " until " + end_time.isoformat())
-
-        response = requests.get("https://tv.api.teleboy.ch/epg/broadcasts?begin="+start_time.isoformat(
+        scraper = cfscrape.create_scraper()
+        response = scraper.get("https://tv.api.teleboy.ch/epg/broadcasts?begin="+start_time.isoformat(
         )+"&end="+end_time.isoformat()+"&expand=station,logos,flags,primary_image&limit=0",
             headers={"x-teleboy-apikey": "db9501d64632a944f1b984d7acaf0b983c5bfcaa723a8dfcf24dd951354d1878"})
         raw_data = json.loads(response.text)
