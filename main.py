@@ -66,38 +66,28 @@ def __main__():
         w.write("<?xml version=\"1.0\" encoding=\"UTF-8\" ?><tv>" +
                 channels_xmltv + programms_xmltv + "</tv>")
 
+    print("[*] Recreating the playlist to automatically match all channels")
+    with open('tv7_for_epg.m3u', 'w+') as w:
+        w.write(recreate_matching_channel_playlist(channels))
+
+    print("[*] Recreating the playlist only with channels that have an EPG")
+    with open('tv7_with_epg_channels.m3u', 'w+') as w:
+        w.write(recreate_matching_channel_playlist(channels, full_epg))
+
 
 def get_channel_list():
-    tv7channel_list = requests.get("https://api.init7.net/tvchannels.m3u").text
-    tv7channel_list = re.sub(r"udp:\/\/.+", "", tv7channel_list)
-    tv7channel_list = tv7channel_list.replace("\n", "")
-    tv7channel_list = tv7channel_list.replace("#EXTM3U", "")
-    tv7channel_list = tv7channel_list.split("#EXTINF:0 ")
-
+    playlist = requests.get("https://api.init7.net/tvchannels.m3u").text
     channel_list = []
-    for channel in tv7channel_list:
-        channel_obj = {}
-        if not channel == "":
-            for attribute in channel.split(" "):
-                if "=" in attribute:
-                    name = attribute.split("=")[0]
-                    value = attribute.split("=")[1].replace("\"", "")
-                else:
-                    value = attribute
-
-                if name == "group-title":
-                    channel_obj["lang"] = value
-                elif name == "tvg-logo":
-                    channel_obj["icon"] = value
-
-            # not all channels have tvg-name so do own stuff....
-            if "display_name" not in channel_obj:
-                channel_obj["display_name"] = channel.split(", ")[1]
-                channel_obj["id"] = gen_channel_id_from_name(
-                    channel_obj["display_name"])
-
-            channel_list.append(channel_obj)
-
+    # extract more information so the playlist can be re-created later
+    for track in re.findall(r"#EXTINF:.*?\n.*?\n", playlist):
+        logo = re.search(r"tvg-logo=\"(.*?)\"", track).group(1)
+        name = re.search(r"tvg-name=\"(.*?)\"", track).group(1)
+        lang = re.search(r"group-title=\"(.*?)\"", track).group(1)
+        title = re.search(r",\s*(.*?)\s*\n", track).group(1)
+        url = re.search(r"\n(.*)$", track).group(1)
+        chid = gen_channel_id_from_name(title)
+        channel = { 'lang':lang, 'icon':logo, 'name':name, 'display_name':title, 'url':url, 'id':chid}
+        channel_list.append(channel)
     return channel_list
 
 
@@ -293,6 +283,32 @@ def channels_to_xmltv(channel_list):
         channels_xml = channels_xml + channel_xml
 
     return channels_xml
+
+
+def recreate_matching_channel_playlist(channels, epg=None):
+    # this playlist assigns channels to epg perfectly by matching tvg-name (m3u) and channel's id (xml)
+    playlist = "#EXTM3U\n"
+    for channel in channels:
+        if skip_channel_without_epg(channel, epg):
+            continue
+        lang = channel["lang"]
+        icon = channel["icon"]
+        name = channel["display_name"]
+        chid = channel["id"]
+        url = channel["url"]
+        track = '#EXTINF:0 tvg-logo="{}" tvg-name"{}" group-title="{}", {}\n{}\n'.format(icon, chid, lang, name, url)
+        playlist = playlist + track
+    return playlist
+
+
+def skip_channel_without_epg(channel, epg):
+    if not epg:
+        return False  # no epg means we want the full playlist
+    for program in epg:
+        if program["channel"] == channel["id"]:
+            return False  # do not skip a channel if we have an epg
+    print("[!] No EPG for channel '{}' with id {} ({})".format(channel["display_name"], channel["id"], channel["name"]))
+    return True
 
 
 __main__()
