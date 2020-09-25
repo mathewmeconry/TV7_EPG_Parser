@@ -5,7 +5,7 @@ Parses tele.ch and teleboy.ch for the EPG-Information and prepares them for TV7 
 https://github.com/mathewmeconry/TV7_EPG_Data
 
 # Matching rate
-~103 channels
+~143 channels
 
 # Requirements
 - python3 >=3.7.3
