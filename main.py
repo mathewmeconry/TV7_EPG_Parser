@@ -36,11 +36,19 @@ def __main__():
     channels = get_channel_list()
 
     print("[*] Getting EPG data from teleboy.ch")
-    teleboy_raw = teleboy.get_epg_by_duration(7 * 24 * 60)
+    teleboy_raw = ""
+    try:
+        teleboy_raw = teleboy.get_epg_by_duration(7 * 24 * 60)
+    except:
+        print("[*] Failed. Continue processing other sources.")
     teleboy_epg = match_teleboy_epg(channels, teleboy_raw)
 
     print("[*] Getting EPG data from tele.ch")
-    tele_raw = tele.get_epg_by_duration(7 * 24 * 60)
+    tele_raw = ""
+    try:
+        tele_raw = tele.get_epg_by_duration(7 * 24 * 60)
+    except:
+        print("[*] Failed. Continue processing other sources.")
     tele_epg = match_tele_epg(channels, tele_raw)
 
     # generate the xml for the channels
