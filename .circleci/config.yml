@@ -19,7 +19,6 @@ jobs:
           name: move files
           command: |
             mv tv7_epg.xml TV7_EPG_Data/
-            mv tv7_tele_epg.xml TV7_EPG_Data/
             mv tv7_teleboy_epg.xml TV7_EPG_Data/
       - run:
           name: configure git
@@ -32,7 +31,6 @@ jobs:
           command: |
             cd TV7_EPG_Data/
             gzip -f tv7_epg.xml
-            gzip -f tv7_tele_epg.xml
             gzip -f tv7_teleboy_epg.xml
       - run:
           name: push stuff
@@ -63,7 +61,6 @@ jobs:
           root: .
           paths:
             - ./tv7_epg.xml
-            - ./tv7_tele_epg.xml
             - ./tv7_teleboy_epg.xml
 
 workflows:
