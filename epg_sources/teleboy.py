@@ -61,7 +61,7 @@ class teleboy:
         scraper = cfscrape.create_scraper()
         response = scraper.get("https://tv.api.teleboy.ch/epg/broadcasts?begin="+start_time.isoformat(
         )+"&end="+end_time.isoformat()+"&expand=station,logos,flags,primary_image&limit=0",
-            headers={"x-teleboy-apikey": "db9501d64632a944f1b984d7acaf0b983c5bfcaa723a8dfcf24dd951354d1878"})
+            headers={"x-teleboy-apikey": "e899f715940a209148f834702fc7f340b6b0496b62120b3ed9c9b3ec4d7dca00"})
         raw_data = json.loads(response.text)
 
         data = []
