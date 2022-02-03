@@ -55,6 +55,20 @@ class teleboy:
 
         return data
 
+    def get_epg_from_past_by_duration(duration: int) -> Dict[epg_item, epg_item]:
+        rounds = math.floor(duration / teleboy.max_duration)
+        past = datetime.datetime.now() - datetime.timedelta(minutes=duration)
+        data = []
+
+        for i in range(0, rounds):
+            data.extend(teleboy.get_epg_by_time(
+                past + datetime.timedelta(minutes=(i*teleboy.max_duration)), teleboy.max_duration))
+
+        data.extend(teleboy.get_epg_by_time(past + datetime.timedelta(minutes=(rounds *
+                                                                              teleboy.max_duration)), duration - (rounds * teleboy.max_duration)))
+
+        return data
+
     def __download__(start_time: datetime.datetime, end_time: datetime.datetime) -> Dict[epg_item, epg_item]:
         print("[*] Dowloading from " + start_time.isoformat() +
               " until " + end_time.isoformat())

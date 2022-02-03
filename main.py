@@ -34,6 +34,14 @@ class programm_item:
 def __main__():
     print("[*] Getting/parsing Init7 tvchannels.m3u playlist")
     channels = get_channel_list()
+    
+    print("[*] Getting past EPG data from teleboy.ch")
+    teleboy_raw = ""
+    try:
+        teleboy_raw = teleboy.get_epg_from_past_by_duration(7 * 24 * 60)
+    except:
+        print("[*] Failed. Continue processing other sources.")
+    teleboy_epg_past = match_teleboy_epg(channels, teleboy_raw)
 
     print("[*] Getting EPG data from teleboy.ch")
     teleboy_raw = ""
@@ -59,6 +67,10 @@ def __main__():
         w.write("<?xml version=\"1.0\" encoding=\"UTF-8\" ?><tv>" +
                 channels_xmltv + programms_to_xmltv(teleboy_epg) + "</tv>")
 
+    with open('tv7_teleboy_epg_past.xml', 'w+') as w:
+        w.write("<?xml version=\"1.0\" encoding=\"UTF-8\" ?><tv>" +
+                channels_xmltv + programms_to_xmltv(teleboy_epg_past) + "</tv>")
+
     # generate tv7_tele_epg.xml
     with open('tv7_tele_epg.xml', 'w+') as w:
         w.write("<?xml version=\"1.0\" encoding=\"UTF-8\" ?><tv>" +
@@ -68,6 +80,7 @@ def __main__():
     full_epg = []
     full_epg.extend(tele_epg)
     full_epg.extend(teleboy_epg)
+    full_epg.extend(teleboy_epg_past)
 
     programms_xmltv = programms_to_xmltv(full_epg)
     with open('tv7_epg.xml', 'w+') as w:
