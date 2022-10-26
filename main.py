@@ -178,7 +178,7 @@ def match_tele_epg(channel_list, tele_epg):
                 programm_matched["episode_num"] = "S" + \
                     str(programm["season"]) + " E" + str(programm["episode"])
             elif "episode" in programm and programm["episode"]:
-                programm_matched["episode_num"] = programm["episode"]
+                programm_matched["episode_num"] = str(programm["episode"])
 
             if "productionYearFirst" in programm and programm["productionYearFirst"]:
                 programm_matched["date"] = programm["productionYearFirst"]
@@ -226,7 +226,7 @@ def match_teleboy_epg(channel_list, teleboy_epg):
                     str(programm["season_num"]) + " E" + \
                     str(programm["episode_num"])
             elif "episode_num" in programm and programm["episode_num"]:
-                programm_matched["episode_num"] = programm["episode_num"]
+                programm_matched["episode_num"] = str(programm["episode_num"])
 
             if "year" in programm and programm["year"]:
                 programm_matched["date"] = programm["year"]
@@ -276,8 +276,8 @@ def programms_to_xmltv(programms):
                         programm["persons"][attrib] + "</"+attrib+">"
             programm_xml = programm_xml + "</credits>"
 
-        if "episode-num" in programm:
-            programm_xml = programm_xml + "<episode-num>" + \
+        if "episode_num" in programm:
+            programm_xml = programm_xml + "<episode-num system=\"onscreen\">" + \
                 programm["episode_num"]+"</episode-num>"
 
         if "date" in programm:
