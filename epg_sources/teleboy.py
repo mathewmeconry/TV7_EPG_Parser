@@ -26,7 +26,7 @@ class teleboy:
     __base__ = "https://www.teleboy.ch/"
     __api__ = "https://tv.api.teleboy.ch/"
     # short duration because of response size (max from teleboy is 323.6 KB)
-    max_duration = 30
+    max_duration = 20
 
     def get_epg_by_time(start_time: datetime.datetime = None, duration: int = None) -> Dict[epg_item, epg_item]:
         if not start_time:
