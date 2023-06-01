@@ -36,7 +36,7 @@ class teleboy:
             duration = teleboy.max_duration
 
         if duration > teleboy.max_duration:
-            print("Duration too long max is " + max_duration + " min")
+            print("Duration too long max is " + teleboy.max_duration + " min")
             return
 
         return teleboy.__download__(start_time, start_time + datetime.timedelta(minutes=duration))
@@ -70,44 +70,51 @@ class teleboy:
         return data
 
     def __download__(start_time: datetime.datetime, end_time: datetime.datetime) -> Dict[epg_item, epg_item]:
-        print("[*] Dowloading from " + start_time.isoformat() +
-              " until " + end_time.isoformat())
-        scraper = cfscrape.create_scraper()
-        response = scraper.get("https://tv.api.teleboy.ch/epg/broadcasts?begin="+start_time.isoformat(
-        )+"&end="+end_time.isoformat()+"&expand=station,logos,flags,primary_image&limit=0",
-            headers={"x-teleboy-apikey": "e899f715940a209148f834702fc7f340b6b0496b62120b3ed9c9b3ec4d7dca00"})
-        raw_data = json.loads(response.text)
+        try:
+            print("[*] Dowloading from " + start_time.isoformat() +
+                " until " + end_time.isoformat())
+            scraper = cfscrape.create_scraper()
+            response = scraper.get("https://tv.api.teleboy.ch/epg/broadcasts?begin="+start_time.isoformat(
+            )+"&end="+end_time.isoformat()+"&expand=station,logos,flags,primary_image&limit=0",
+                headers={"x-teleboy-apikey": "e899f715940a209148f834702fc7f340b6b0496b62120b3ed9c9b3ec4d7dca00"})
+            raw_data = json.loads(response.text)
 
-        data = []
-        if "data" in raw_data and "items" in raw_data["data"]:
-            for item in raw_data["data"]["items"]:
-                item_epg = {
-                    "subtitle": item["subtitle"],
-                    "image": item["primary_image"]["base_path"] + "raw/" + item["primary_image"]["hash"] + ".jpg",
-                    "begin": dateutil.parser.parse(item["begin"]),
-                    "end": dateutil.parser.parse(item["end"]),
-                    "title": item["title"],
-                    "station": item["station"]["name"],
-                    "stationid": item["station"]["id"]
-                }
+            data = []
+            if "data" in raw_data and "items" in raw_data["data"]:
+                for item in raw_data["data"]["items"]:
+                    item_epg = {
+                        "subtitle": item["subtitle"],
+                        "image": item["primary_image"]["base_path"] + "raw/" + item["primary_image"]["hash"] + ".jpg",
+                        "begin": dateutil.parser.parse(item["begin"]),
+                        "end": dateutil.parser.parse(item["end"]),
+                        "title": item["title"],
+                        "station": item["station"]["name"],
+                        "stationid": item["station"]["id"]
+                    }
 
-                if "serie_episode" in item:
-                    item_epg["episode_num"] = item["serie_episode"]
+                    if "serie_episode" in item:
+                        item_epg["episode_num"] = item["serie_episode"]
 
-                if "serie_season" in item:
-                    item_epg["season_num"] = item["serie_season"]
+                    if "serie_season" in item:
+                        item_epg["season_num"] = item["serie_season"]
 
-                if "short_description" in item:
-                    item_epg["desc"] = item["short_description"]
+                    if "short_description" in item:
+                        item_epg["desc"] = item["short_description"]
 
-                if "country" in item:
-                    item_epg["country"] = item["country"]
+                    if "country" in item:
+                        item_epg["country"] = item["country"]
 
-                if "year" in item:
-                    item_epg["year"] = item["year"]
+                    if "year" in item:
+                        item_epg["year"] = item["year"]
 
-                if "duration" in item:
-                    item_epg["duration"] = item["duration"]
+                    if "duration" in item:
+                        item_epg["duration"] = item["duration"]
 
-                data.append(item_epg)
-        return data
+                    data.append(item_epg)
+            if(len(data) == 0):
+                print("[!] No data returned. Still continuing...")
+            return data
+        except Exception as e:
+            print("[!] Download failed with err")
+            print(e)
+        return []

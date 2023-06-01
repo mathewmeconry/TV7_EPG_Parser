@@ -241,6 +241,10 @@ def programms_to_xmltv(programms):
     print("[*] Generating XML for " + str(len(programms)) + " programms")
     programms_xml = ""
     for programm in programms:
+
+        if programm["title"] == "Tagesschau" and programm["channel"] == "daserste":
+            print(programm['start'])
+
         programm_xml = ""
         programm_xml = programm_xml + "<programme start=\""+programm["start"].strftime(
             "%Y%m%d%H%M%S %z")+"\" stop=\""+programm["stop"].strftime("%Y%m%d%H%M%S %z")+"\" channel=\""+programm["channel"]+"\">"
