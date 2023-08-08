@@ -1,9 +1,8 @@
 import datetime
 import dateutil
 import math
-from requests_html import HTMLSession
 from typing import Dict
-
+from requests import Session
 
 class epg_item:
     subtitle: str
@@ -25,9 +24,11 @@ class teleboy:
     __api__ = "https://tv.api.teleboy.ch/"
 
     def __init__(self):
-        # HTML Session to provide js/browser-like suppport for CF
-        self.html_session = HTMLSession()
-        self.html_session.headers.update({"x-teleboy-apikey": "e899f715940a209148f834702fc7f340b6b0496b62120b3ed9c9b3ec4d7dca00"})
+        # Session to maintain headers across sesssion for CF.  
+        self.sess = Session()
+        self.sess.headers.update({"x-teleboy-apikey": "e899f715940a209148f834702fc7f340b6b0496b62120b3ed9c9b3ec4d7dca00"})
+        # using generic browser header to avoid 403
+        self.sess.headers.update({"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36"})
         # short duration because of response size (max from teleboy is 323.6 KB)
         self.max_duration = 20
 
@@ -76,7 +77,7 @@ class teleboy:
     def __download__(self, start_time: datetime.datetime, end_time: datetime.datetime) -> Dict[epg_item, epg_item]:
         try:
             print(f"[*] Dowloading from {start_time.isoformat()} until {end_time.isoformat()}")
-            response = self.html_session.get("https://tv.api.teleboy.ch/epg/broadcasts?begin="
+            response = self.sess.get("https://tv.api.teleboy.ch/epg/broadcasts?begin="
                                              f"{start_time.isoformat()}&end={end_time.isoformat()}&expand=station,logos,flags,primary_image&limit=0")
             raw_data = response.json()
 
