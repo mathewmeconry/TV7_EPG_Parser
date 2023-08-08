@@ -1,10 +1,8 @@
 import datetime
 import dateutil
 import math
-import requests
-import json
+from requests_html import HTMLSession
 from typing import Dict
-import cfscrape
 
 
 class epg_item:
@@ -25,66 +23,69 @@ class epg_item:
 class teleboy:
     __base__ = "https://www.teleboy.ch/"
     __api__ = "https://tv.api.teleboy.ch/"
-    # short duration because of response size (max from teleboy is 323.6 KB)
-    max_duration = 20
 
-    def get_epg_by_time(start_time: datetime.datetime = None, duration: int = None) -> Dict[epg_item, epg_item]:
+    def __init__(self):
+        # HTML Session to provide js/browser-like suppport for CF
+        self.html_session = HTMLSession()
+        self.html_session.headers.update({"x-teleboy-apikey": "e899f715940a209148f834702fc7f340b6b0496b62120b3ed9c9b3ec4d7dca00"})
+        # short duration because of response size (max from teleboy is 323.6 KB)
+        self.max_duration = 20
+
+
+    def get_epg_by_time(self, start_time: datetime.datetime = None, duration: int = None) -> Dict[epg_item, epg_item]:
         if not start_time:
             start_time = datetime.datetime.now()
 
         if not duration:
-            duration = teleboy.max_duration
+            duration = self.max_duration
 
-        if duration > teleboy.max_duration:
-            print("Duration too long max is " + teleboy.max_duration + " min")
+        if duration > self.max_duration:
+            print(f"Duration too long max is {self.max_duration} min")
             return
 
-        return teleboy.__download__(start_time, start_time + datetime.timedelta(minutes=duration))
+        return self.__download__(start_time, start_time + datetime.timedelta(minutes=duration))
 
-    def get_epg_by_duration(duration: int) -> Dict[epg_item, epg_item]:
-        rounds = math.floor(duration / teleboy.max_duration)
+    def get_epg_by_duration(self, duration: int) -> Dict[epg_item, epg_item]:
+        rounds = math.floor(duration / self.max_duration)
         now = datetime.datetime.now()
         data = []
 
         for i in range(0, rounds):
-            data.extend(teleboy.get_epg_by_time(
-                now + datetime.timedelta(minutes=(i*teleboy.max_duration)), teleboy.max_duration))
+            data.extend(self.get_epg_by_time(
+                now + datetime.timedelta(minutes=(i*self.max_duration)), self.max_duration))
 
-        data.extend(teleboy.get_epg_by_time(now + datetime.timedelta(minutes=(rounds *
-                                                                              teleboy.max_duration)), duration - (rounds * teleboy.max_duration)))
+        data.extend(self.get_epg_by_time(now + datetime.timedelta(minutes=(rounds *
+                                                                              self.max_duration)), duration - (rounds * self.max_duration)))
 
         return data
 
-    def get_epg_from_past_by_duration(duration: int) -> Dict[epg_item, epg_item]:
-        rounds = math.floor(duration / teleboy.max_duration)
+    def get_epg_from_past_by_duration(self, duration: int) -> Dict[epg_item, epg_item]:
+        rounds = math.floor(duration / self.max_duration)
         past = datetime.datetime.now() - datetime.timedelta(minutes=duration)
         data = []
 
         for i in range(0, rounds):
-            data.extend(teleboy.get_epg_by_time(
-                past + datetime.timedelta(minutes=(i*teleboy.max_duration)), teleboy.max_duration))
+            data.extend(self.get_epg_by_time(
+                past + datetime.timedelta(minutes=(i*self.max_duration)), self.max_duration))
 
-        data.extend(teleboy.get_epg_by_time(past + datetime.timedelta(minutes=(rounds *
-                                                                              teleboy.max_duration)), duration - (rounds * teleboy.max_duration)))
+        data.extend(self.get_epg_by_time(past + datetime.timedelta(minutes=(rounds *
+                                                                              self.max_duration)), duration - (rounds * self.max_duration)))
 
         return data
 
-    def __download__(start_time: datetime.datetime, end_time: datetime.datetime) -> Dict[epg_item, epg_item]:
+    def __download__(self, start_time: datetime.datetime, end_time: datetime.datetime) -> Dict[epg_item, epg_item]:
         try:
-            print("[*] Dowloading from " + start_time.isoformat() +
-                " until " + end_time.isoformat())
-            scraper = cfscrape.create_scraper()
-            response = scraper.get("https://tv.api.teleboy.ch/epg/broadcasts?begin="+start_time.isoformat(
-            )+"&end="+end_time.isoformat()+"&expand=station,logos,flags,primary_image&limit=0",
-                headers={"x-teleboy-apikey": "e899f715940a209148f834702fc7f340b6b0496b62120b3ed9c9b3ec4d7dca00"})
-            raw_data = json.loads(response.text)
+            print(f"[*] Dowloading from {start_time.isoformat()} until {end_time.isoformat()}")
+            response = self.html_session.get("https://tv.api.teleboy.ch/epg/broadcasts?begin="
+                                             f"{start_time.isoformat()}&end={end_time.isoformat()}&expand=station,logos,flags,primary_image&limit=0")
+            raw_data = response.json()
 
             data = []
             if "data" in raw_data and "items" in raw_data["data"]:
                 for item in raw_data["data"]["items"]:
                     item_epg = {
                         "subtitle": item["subtitle"],
-                        "image": item["primary_image"]["base_path"] + "raw/" + item["primary_image"]["hash"] + ".jpg",
+                        "image": f"{item['primary_image']['base_path']}raw/{item['primary_image']['hash']}.jpg",
                         "begin": dateutil.parser.parse(item["begin"]),
                         "end": dateutil.parser.parse(item["end"]),
                         "title": item["title"],
