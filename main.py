@@ -4,7 +4,6 @@ import re
 import datetime
 import html
 import json
-from epg_sources.tele import tele
 from epg_sources.teleboy import teleboy
 
 
@@ -36,9 +35,10 @@ def __main__():
     channels = get_channel_list()
     
     print("[*] Getting past EPG data from teleboy.ch")
+    teleboyObj = teleboy()
     teleboy_raw = ""
     try:
-        teleboy_raw = teleboy.get_epg_from_past_by_duration(7 * 24 * 60)
+        teleboy_raw = teleboyObj.get_epg_from_past_by_duration(7 * 24 * 60)
     except:
         print("[*] Failed. Continue processing other sources.")
     teleboy_epg_past = match_teleboy_epg(channels, teleboy_raw)
@@ -46,18 +46,10 @@ def __main__():
     print("[*] Getting EPG data from teleboy.ch")
     teleboy_raw = ""
     try:
-        teleboy_raw = teleboy.get_epg_by_duration(7 * 24 * 60)
+        teleboy_raw = teleboyObj.get_epg_by_duration(7 * 24 * 60)
     except:
         print("[*] Failed. Continue processing other sources.")
     teleboy_epg = match_teleboy_epg(channels, teleboy_raw)
-
-    print("[*] Getting EPG data from tele.ch")
-    tele_raw = ""
-    try:
-        tele_raw = tele.get_epg_by_duration(7 * 24 * 60)
-    except:
-        print("[*] Failed. Continue processing other sources.")
-    tele_epg = match_tele_epg(channels, tele_raw)
 
     # generate the xml for the channels
     channels_xmltv = channels_to_xmltv(channels)
@@ -71,14 +63,8 @@ def __main__():
         w.write("<?xml version=\"1.0\" encoding=\"UTF-8\" ?><tv>"
                 f"{channels_xmltv}{programms_to_xmltv(teleboy_epg_past)}</tv>")
 
-    # generate tv7_tele_epg.xml
-    with open('tv7_tele_epg.xml', 'w+') as w:
-        w.write("<?xml version=\"1.0\" encoding=\"UTF-8\" ?><tv>"
-                f"{channels_xmltv}{programms_to_xmltv(tele_epg)}</tv>")
-
     # generate tv7_epg.xml
     full_epg = []
-    full_epg.extend(tele_epg)
     full_epg.extend(teleboy_epg)
     full_epg.extend(teleboy_epg_past)
 
@@ -132,62 +118,6 @@ def find_channel_by_id(id, channel_list):
             return True
 
     return False
-
-
-def match_tele_epg(channel_list, tele_epg):
-    print(f"[*] Matching tele.ch EPG data ({str(len(tele_epg))}"
-          f" programms to {str(len(channel_list))} channels)")
-    mapping = json.loads(open('./mappings/tele.json', 'r').read())
-    programms = []
-    matched_channels = set()
-    for programm in tele_epg:
-        channel_id = gen_channel_id_from_name(programm["channelLong"])
-
-        if channel_id in mapping:
-            channel_id = mapping[channel_id]
-
-        if find_channel_by_id(channel_id, channel_list):
-            matched_channels.add(channel_id)
-            programm_matched = {
-                "start": programm["availabilityStartTime"],
-                "stop": programm["availabilityEndTime"],
-                "channel": channel_id,
-                "icon": programm["image"],
-                "title": programm["title"],
-            }
-
-            if "subtitle" in programm and programm["subtitle"]:
-                programm_matched["sub_title"] = programm["subtitle"]
-
-            if "productionCountry" in programm and programm["productionCountry"]:
-                programm_matched["country"] = programm["productionCountry"]
-
-            if "synopsis" in programm and programm["synopsis"]:
-                programm_matched["desc"] = programm["synopsis"]
-
-            if "persons" in programm and programm["persons"]:
-                programm_matched["credits"] = programm["persons"]
-                if "cast" in programm["persons"] and programm["persons"]["cast"]:
-                    programm_matched["credits"]["actors"] = programm["persons"]["cast"]
-                    del programm_matched["credits"]["cast"]
-
-            if "category" in programm and programm["category"]:
-                programm_matched["category"] = programm["category"]
-
-            if "episode" in programm and "season" in programm and programm["episode"] and programm["season"]:
-                programm_matched["episode_num"] = f"S{str(programm['season'])} E{str(programm['episode'])}"
-
-            elif "episode" in programm and programm["episode"]:
-                programm_matched["episode_num"] = str(programm["episode"])
-
-            if "productionYearFirst" in programm and programm["productionYearFirst"]:
-                programm_matched["date"] = programm["productionYearFirst"]
-
-            programms.append(programm_matched)
-
-    print(f"[✓] Matched {str(len(matched_channels))} tele.ch channels")
-    return programms
-
 
 def match_teleboy_epg(channel_list, teleboy_epg):
     print(f"[*] Matching teleboy.ch EPG data ({str(len(teleboy_epg))}"
@@ -308,4 +238,3 @@ def channels_to_xmltv(channel_list):
 
 
 __main__()
-# programm.availabilityStartTime.strftime("%Y%m%d%H%M%S %z"),
