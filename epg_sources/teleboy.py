@@ -1,5 +1,5 @@
 import datetime
-import dateutil
+import dateutil.parser
 import math
 from typing import Dict
 from requests import Session
