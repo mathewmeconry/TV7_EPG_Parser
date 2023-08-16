@@ -33,7 +33,7 @@ class programm_item:
 def __main__():
     print("[*] Getting/parsing Init7 tvchannels.m3u playlist")
     channels = get_channel_list()
-    
+
     print("[*] Getting past EPG data from teleboy.ch")
     teleboyObj = teleboy()
     teleboy_raw = ""
@@ -175,11 +175,11 @@ def programms_to_xmltv(programms):
 
         programm_xml = ""
         programm_xml = (f"{programm_xml}<programme start=\""
-                    f"{programm['start'].strftime('%Y%m%d%H%M%S %z')}\"" 
+                    f"{programm['start'].strftime('%Y%m%d%H%M%S %z')} \""
                     f"stop=\"{programm['stop'].strftime('%Y%m%d%H%M%S %z')}\" channel=\"{programm['channel']}\">")
 
         programm_xml = f"{programm_xml}<icon src=\"{programm['icon']}\" />"
-        programm_xml =  f"{programm_xml}<title>{html.escape(programm['title'] or '')}</title>"
+        programm_xml = f"{programm_xml}<title>{html.escape(programm['title'] or '')}</title>"
 
         if "sub_title" in programm:
             programm_xml = f"{programm_xml}<sub-title>{html.escape(programm['sub_title'] or '')}</sub-title>"
