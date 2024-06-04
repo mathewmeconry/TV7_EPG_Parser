@@ -155,7 +155,6 @@ def match_init7_epg(channel_list, init7_epg):
     )
     programms = []
     for programm in init7_epg:
-        print(programm)
         channel_id = gen_channel_id_from_name(programm["station"])
 
         if channel_id in channel_list:
