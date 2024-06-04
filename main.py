@@ -5,6 +5,7 @@ import datetime
 import html
 import json
 from epg_sources.teleboy import teleboy
+from epg_sources.init7 import init7
 
 
 class channel_item:
@@ -33,12 +34,17 @@ class programm_item:
 def __main__():
     print("[*] Getting/parsing Init7 tvchannels.m3u playlist")
     channels = get_channel_list()
-    
+
+    print("[*] Getting EPG data from Init7")
+    init7Obj = init7()
+    init7_epg_raw = init7Obj.get_epg(7 * 24 * 60 * 60, 7 * 24 * 60 * 60)
+    init7_epg = match_init7_epg(channels, init7_epg_raw)
+
     print("[*] Getting past EPG data from teleboy.ch")
     teleboyObj = teleboy()
     teleboy_raw = ""
     try:
-        teleboy_raw = teleboyObj.get_epg_from_past_by_duration(7 * 24 * 60)
+        teleboy_raw = teleboyObj.get_epg_from_past_by_duration(60)
     except:
         print("[*] Failed. Continue processing other sources.")
     teleboy_epg_past = match_teleboy_epg(channels, teleboy_raw)
@@ -46,7 +52,7 @@ def __main__():
     print("[*] Getting EPG data from teleboy.ch")
     teleboy_raw = ""
     try:
-        teleboy_raw = teleboyObj.get_epg_by_duration(7 * 24 * 60)
+        teleboy_raw = teleboyObj.get_epg_by_duration(60)
     except:
         print("[*] Failed. Continue processing other sources.")
     teleboy_epg = match_teleboy_epg(channels, teleboy_raw)
@@ -55,23 +61,36 @@ def __main__():
     channels_xmltv = channels_to_xmltv(channels)
 
     # generate tv7_teleboy_epg.xml
-    with open('tv7_teleboy_epg.xml', 'w+') as w:
-        w.write("<?xml version=\"1.0\" encoding=\"UTF-8\" ?><tv>"
-                f"{channels_xmltv}{programms_to_xmltv(teleboy_epg)}</tv>")
+    with open("tv7_teleboy_epg.xml", "w+") as w:
+        w.write(
+            '<?xml version="1.0" encoding="UTF-8" ?><tv>'
+            f"{channels_xmltv}{programms_to_xmltv(teleboy_epg)}</tv>"
+        )
 
-    with open('tv7_teleboy_epg_past.xml', 'w+') as w:
-        w.write("<?xml version=\"1.0\" encoding=\"UTF-8\" ?><tv>"
-                f"{channels_xmltv}{programms_to_xmltv(teleboy_epg_past)}</tv>")
+    with open("tv7_teleboy_epg_past.xml", "w+") as w:
+        w.write(
+            '<?xml version="1.0" encoding="UTF-8" ?><tv>'
+            f"{channels_xmltv}{programms_to_xmltv(teleboy_epg_past)}</tv>"
+        )
+
+    with open("tv7_init7_epg.xml", "w+") as w:
+        w.write(
+            '<?xml version="1.0" encoding="UTF-8" ?><tv>'
+            f"{channels_xmltv}{programms_to_xmltv(init7_epg)}</tv>"
+        )
 
     # generate tv7_epg.xml
     full_epg = []
     full_epg.extend(teleboy_epg)
     full_epg.extend(teleboy_epg_past)
+    full_epg.extend(init7_epg)
 
     programms_xmltv = programms_to_xmltv(full_epg)
-    with open('tv7_epg.xml', 'w+') as w:
-        w.write("<?xml version=\"1.0\" encoding=\"UTF-8\" ?><tv>"
-                f"{channels_xmltv}{programms_xmltv}</tv>")
+    with open("tv7_epg.xml", "w+") as w:
+        w.write(
+            '<?xml version="1.0" encoding="UTF-8" ?><tv>'
+            f"{channels_xmltv}{programms_xmltv}</tv>"
+        )
 
 
 def get_channel_list():
@@ -88,7 +107,7 @@ def get_channel_list():
             for attribute in channel.split(" "):
                 if "=" in attribute:
                     name = attribute.split("=")[0]
-                    value = attribute.split("=")[1].replace("\"", "")
+                    value = attribute.split("=")[1].replace('"', "")
                 else:
                     value = attribute
 
@@ -101,7 +120,8 @@ def get_channel_list():
             if "display_name" not in channel_obj:
                 channel_obj["display_name"] = channel.split(", ")[1]
                 channel_obj["id"] = gen_channel_id_from_name(
-                    channel_obj["display_name"])
+                    channel_obj["display_name"]
+                )
 
             channel_list.append(channel_obj)
 
@@ -109,7 +129,15 @@ def get_channel_list():
 
 
 def gen_channel_id_from_name(channel_name):
-    return channel_name.lower().replace("hd", "").replace("schweiz", "").replace("ch", "").replace("(", "").replace(")", "").replace(" ", "")
+    return (
+        channel_name.lower()
+        .replace("hd", "")
+        .replace("schweiz", "")
+        .replace("ch", "")
+        .replace("(", "")
+        .replace(")", "")
+        .replace(" ", "")
+    )
 
 
 def find_channel_by_id(id, channel_list):
@@ -119,10 +147,30 @@ def find_channel_by_id(id, channel_list):
 
     return False
 
+
+def match_init7_epg(channel_list, init7_epg):
+    print(
+        f"[*] Matching init7.ch EPG data ({str(len(init7_epg))}"
+        f" programms to {str(len(channel_list))} channels)"
+    )
+    programms = []
+    for programm in init7_epg:
+        print(programm)
+        channel_id = gen_channel_id_from_name(programm["station"])
+
+        if channel_id in channel_list:
+            programm["channel"] = channel_id
+            programms.append(programm)
+
+    return programms
+
+
 def match_teleboy_epg(channel_list, teleboy_epg):
-    print(f"[*] Matching teleboy.ch EPG data ({str(len(teleboy_epg))}"
-          f" programms to {str(len(channel_list))} channels)")
-    mapping = json.loads(open('./mappings/teleboy.json', 'r').read())
+    print(
+        f"[*] Matching teleboy.ch EPG data ({str(len(teleboy_epg))}"
+        f" programms to {str(len(channel_list))} channels)"
+    )
+    mapping = json.loads(open("./mappings/teleboy.json", "r").read())
     programms = []
     matched_channels = set()
     for programm in teleboy_epg:
@@ -151,8 +199,15 @@ def match_teleboy_epg(channel_list, teleboy_epg):
             if "desc" in programm and programm["desc"]:
                 programm_matched["desc"] = programm["desc"]
 
-            if "episode_num" in programm and "season_num" in programm and programm["episode_num"] and programm["season_num"]:
-                programm_matched["episode_num"] = f"S{str(programm['season_num'])} E{str(programm['episode_num'])}"
+            if (
+                "episode_num" in programm
+                and "season_num" in programm
+                and programm["episode_num"]
+                and programm["season_num"]
+            ):
+                programm_matched["episode_num"] = (
+                    f"S{str(programm['season_num'])} E{str(programm['episode_num'])}"
+                )
             elif "episode_num" in programm and programm["episode_num"]:
                 programm_matched["episode_num"] = str(programm["episode_num"])
 
@@ -169,17 +224,17 @@ def programms_to_xmltv(programms):
     print(f"[*] Generating XML for {str(len(programms))} programms")
     programms_xml = ""
     for programm in programms:
-
-        if programm["title"] == "Tagesschau" and programm["channel"] == "daserste":
-            print(programm['start'])
-
         programm_xml = ""
-        programm_xml = (f"{programm_xml}<programme start=\""
-                    f"{programm['start'].strftime('%Y%m%d%H%M%S %z')}\" " 
-                    f"stop=\"{programm['stop'].strftime('%Y%m%d%H%M%S %z')}\" channel=\"{programm['channel']}\">")
+        programm_xml = (
+            f'{programm_xml}<programme start="'
+            f"{programm['start'].strftime('%Y%m%d%H%M%S %z')}\" "
+            f"stop=\"{programm['stop'].strftime('%Y%m%d%H%M%S %z')}\" channel=\"{programm['channel']}\">"
+        )
 
         programm_xml = f"{programm_xml}<icon src=\"{programm['icon']}\" />"
-        programm_xml =  f"{programm_xml}<title>{html.escape(programm['title'] or '')}</title>"
+        programm_xml = (
+            f"{programm_xml}<title>{html.escape(programm['title'] or '')}</title>"
+        )
 
         if "sub_title" in programm:
             programm_xml = f"{programm_xml}<sub-title>{html.escape(programm['sub_title'] or '')}</sub-title>"
@@ -204,12 +259,15 @@ def programms_to_xmltv(programms):
             programm_xml = f"{programm_xml}</credits>"
 
         if "episode_num" in programm:
-            programm_xml = f"{programm_xml}<episode-num system=\"onscreen\">{programm['episode_num']}</episode-num>"
+            if "episode_num_system" in programm:
+                programm_xml = f"{programm_xml}<episode-num system=\"{programm['episode_num_system']}\">{programm['episode_num']}</episode-num>"
+            else:
+                programm_xml = f"{programm_xml}<episode-num system=\"onscreen\">{programm['episode_num']}</episode-num>"
 
         if "date" in programm:
             programm_xml = f"{programm_xml}<date>{str(programm['date'])}</date>"
 
-        if "durationSeconds" in programm:
+        if "duration" in programm:
             programm_xml = f"{programm_xml}<length>{str(programm['duration'])}</length>"
 
         programm_xml = f"{programm_xml}</programme>"
@@ -222,13 +280,14 @@ def channels_to_xmltv(channel_list):
     print(f"[*] Generating XML for {str(len(channel_list))} channels")
     channels_xml = ""
     for channel in channel_list:
-        channel_xml = (f"<channel id=\"{channel['id']}\">"
-                      f"<display-name lang=\"de\">{channel['display_name']}</display-name>"
-                      f"<display-name lang=\"fr\">{channel['display_name']}</display-name>"
-                      f"<display-name lang=\"it\">{channel['display_name']}</display-name>"
+        channel_xml = (
+            f"<channel id=\"{channel['id']}\">"
+            f"<display-name lang=\"de\">{channel['display_name']}</display-name>"
+            f"<display-name lang=\"fr\">{channel['display_name']}</display-name>"
+            f"<display-name lang=\"it\">{channel['display_name']}</display-name>"
         )
 
-        if 'icon' in channel:
+        if "icon" in channel:
             channel_xml = f"{channel_xml}<icon src=\"{channel['icon']}\" />"
 
         channel_xml = f"{channel_xml}</channel>"
