@@ -24,7 +24,7 @@ class init7:
             search_resp = self.__download__(limit, offset)
             first_entry = search_resp["results"][0]
             entry_start = dateutil.parser.parse(first_entry["timeslot"]["lower"])
-            if entry_start < start_time:
+            if entry_start < start_time or offset == 0:
                 delta = entry_start - start_time
                 if delta.seconds > max_past or offset == 0:
                     break

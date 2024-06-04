@@ -157,7 +157,7 @@ def match_init7_epg(channel_list, init7_epg):
     for programm in init7_epg:
         channel_id = gen_channel_id_from_name(programm["station"])
 
-        if channel_id in channel_list:
+        if find_channel_by_id(channel_id, channel_list):
             programm["channel"] = channel_id
             programms.append(programm)
 
