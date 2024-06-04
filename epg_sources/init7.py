@@ -44,7 +44,7 @@ class init7:
                     continue
 
                 item_epg = {
-                    "begin": lower,
+                    "start": lower,
                     "end": upper,
                     "title": item["title"],
                     "station": item["channel"]["name"],
