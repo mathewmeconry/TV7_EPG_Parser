@@ -44,7 +44,7 @@ def __main__():
     teleboyObj = teleboy()
     teleboy_raw = ""
     try:
-        teleboy_raw = teleboyObj.get_epg_from_past_by_duration(7 * 24 * 60))
+        teleboy_raw = teleboyObj.get_epg_from_past_by_duration(7 * 24 * 60)
     except:
         print("[*] Failed. Continue processing other sources.")
     teleboy_epg_past = match_teleboy_epg(channels, teleboy_raw)
