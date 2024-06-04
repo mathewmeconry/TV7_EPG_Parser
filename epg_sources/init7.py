@@ -74,6 +74,10 @@ class init7:
 
                 epg_data.append(item_epg)
 
+            if len(download_resp["results"]) == 0:
+                print("[*] No more data")
+                break
+
             if (
                 dateutil.parser.parse(download_resp["results"][0]["timeslot"]["upper"])
                 > end_time
