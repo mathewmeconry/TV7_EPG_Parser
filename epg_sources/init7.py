@@ -45,16 +45,16 @@ class init7:
 
                 item_epg = {
                     "start": lower,
-                    "end": upper,
+                    "stop": upper,
                     "title": item["title"],
-                    "station": item["channel"]["name"],
+                    "channel": item["channel"]["name"],
                 }
 
                 if "sub_title" in item:
-                    item_epg["subtitle"] = item["sub_title"]
+                    item_epg["sub_title"] = item["sub_title"]
 
                 if "icons" in item and len(item["icons"]) > 0:
-                    item_epg["image"] = item["icons"][0]
+                    item_epg["icon"] = item["icons"][0]
 
                 if "episode_num" in item:
                     item_epg["episode_num"] = item["episode_num"]
