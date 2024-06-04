@@ -8,4 +8,6 @@ tv7_epg.xml
 tv7_epg.xml.gz
 tv7_teleboy_epg_past.xml
 tv7_teleboy_epg_past.xml.gz
+tv7_init7_epg.xml
+tv7_init7_epg.xml.gz
 .env/
