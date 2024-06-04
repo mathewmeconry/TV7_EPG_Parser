@@ -229,10 +229,12 @@ def programms_to_xmltv(programms):
             f"stop=\"{programm['stop'].strftime('%Y%m%d%H%M%S %z')}\" channel=\"{programm['channel']}\">"
         )
 
-        programm_xml = f"{programm_xml}<icon src=\"{programm['icon']}\" />"
-        programm_xml = (
-            f"{programm_xml}<title>{html.escape(programm['title'] or '')}</title>"
-        )
+        if "icon" in programm:
+            programm_xml = f"{programm_xml}<icon src=\"{programm['icon']}\" />"
+        if "title" in programm:
+            programm_xml = (
+                f"{programm_xml}<title>{html.escape(programm['title'] or '')}</title>"
+            )
 
         if "sub_title" in programm:
             programm_xml = f"{programm_xml}<sub-title>{html.escape(programm['sub_title'] or '')}</sub-title>"
