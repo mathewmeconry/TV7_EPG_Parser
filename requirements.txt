@@ -13,7 +13,7 @@ cycler==0.12.1
 cytoolz==0.12.1
 discord.py==2.2.3
 dulwich==0.21.3
-eth-abi==4.0.0
+eth-abi==5.0.1
 eth-account==0.8.0
 eth-hash==0.5.1
 eth-keyfile==0.6.1
