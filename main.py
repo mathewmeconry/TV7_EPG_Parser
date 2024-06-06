@@ -229,7 +229,7 @@ def programms_to_xmltv(programms):
             f"stop=\"{programm['stop'].strftime('%Y%m%d%H%M%S %z')}\" channel=\"{programm['channel']}\">"
         )
 
-        if "icon" in programm:
+        if "icon" in programm and programm["icon"] != "":
             programm_xml = f"{programm_xml}<icon src=\"{programm['icon']}\" />"
         if "title" in programm:
             programm_xml = (
@@ -244,6 +244,10 @@ def programms_to_xmltv(programms):
 
         if "category" in programm:
             programm_xml = f"{programm_xml}<category lang=\"de\">{html.escape(programm['category'] or '')}</category>"
+
+        if "categories" in programm:
+            for category in programm["categories"]:
+                programm_xml = f"{programm_xml}<category lang=\"de\">{html.escape(category or '')}</category>"
 
         if "desc" in programm:
             programm_xml = f"{programm_xml}<desc lang=\"de\">{html.escape(programm['desc'] or '')}</desc>"
@@ -268,7 +272,7 @@ def programms_to_xmltv(programms):
             programm_xml = f"{programm_xml}<date>{str(programm['date'])}</date>"
 
         if "duration" in programm:
-            programm_xml = f"{programm_xml}<length>{str(programm['duration'])}</length>"
+            programm_xml = f"{programm_xml}<length units=\"seconds\">{str(int(programm['duration']))}</length>"
 
         programm_xml = f"{programm_xml}</programme>"
         programms_xml = programms_xml + programm_xml

@@ -48,7 +48,12 @@ class init7:
                     "stop": upper,
                     "title": item["title"],
                     "channel": item["channel"]["name"],
+                    "categories": item["categories"],
                 }
+
+                duration = upper - lower
+                if not isinstance(duration, int):
+                    item_epg["duration"] = duration.total_seconds()
 
                 if "sub_title" in item:
                     item_epg["sub_title"] = item["sub_title"]
@@ -68,11 +73,10 @@ class init7:
                 if "country" in item:
                     item_epg["country"] = item["country"]
 
-                if "duration" in item:
-                    duration = upper - lower
-                    item_epg["duration"] = duration.seconds()
-
                 epg_data.append(item_epg)
+
+            if offset > 5000:
+                break
 
             if len(download_resp["results"]) == 0:
                 print("[*] No more data")
