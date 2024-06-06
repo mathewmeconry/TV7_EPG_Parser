@@ -37,8 +37,12 @@ def __main__():
 
     print("[*] Getting EPG data from Init7")
     init7Obj = init7()
-    init7_epg_raw = init7Obj.get_epg(7 * 24 * 60 * 60, 7 * 24 * 60 * 60)
-    init7_epg = match_init7_epg(channels, init7_epg_raw)
+    init7_epg = []
+    try:
+        init7_epg_raw = init7Obj.get_epg(7 * 24 * 60 * 60, 7 * 24 * 60 * 60)
+        init7_epg = match_init7_epg(channels, init7_epg_raw)
+    except:
+        print("[*] Failed. Continue processing other sources.")
 
     print("[*] Getting past EPG data from teleboy.ch")
     teleboyObj = teleboy()
@@ -62,22 +66,25 @@ def __main__():
 
     # generate tv7_teleboy_epg.xml
     with open("tv7_teleboy_epg.xml", "w+") as w:
-        w.write(
-            '<?xml version="1.0" encoding="UTF-8" ?><tv>'
-            f"{channels_xmltv}{programms_to_xmltv(teleboy_epg)}</tv>"
-        )
+        if len(teleboy_epg) > 0:
+            w.write(
+                '<?xml version="1.0" encoding="UTF-8" ?><tv>'
+                f"{channels_xmltv}{programms_to_xmltv(teleboy_epg)}</tv>"
+            )
 
     with open("tv7_teleboy_epg_past.xml", "w+") as w:
-        w.write(
-            '<?xml version="1.0" encoding="UTF-8" ?><tv>'
-            f"{channels_xmltv}{programms_to_xmltv(teleboy_epg_past)}</tv>"
-        )
+        if len(teleboy_epg_past) > 0:
+            w.write(
+                '<?xml version="1.0" encoding="UTF-8" ?><tv>'
+                f"{channels_xmltv}{programms_to_xmltv(teleboy_epg_past)}</tv>"
+            )
 
     with open("tv7_init7_epg.xml", "w+") as w:
-        w.write(
-            '<?xml version="1.0" encoding="UTF-8" ?><tv>'
-            f"{channels_xmltv}{programms_to_xmltv(init7_epg)}</tv>"
-        )
+        if len(init7_epg) > 0:
+            w.write(
+                '<?xml version="1.0" encoding="UTF-8" ?><tv>'
+                f"{channels_xmltv}{programms_to_xmltv(init7_epg)}</tv>"
+            )
 
     # generate tv7_epg.xml
     full_epg = []
