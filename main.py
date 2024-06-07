@@ -236,8 +236,6 @@ def programms_to_xmltv(programms):
             f"stop=\"{programm['stop'].strftime('%Y%m%d%H%M%S %z')}\" channel=\"{programm['channel']}\">"
         )
 
-        if "icon" in programm and programm["icon"] != "":
-            programm_xml = f"{programm_xml}<icon src=\"{programm['icon']}\" />"
         if "title" in programm:
             programm_xml = (
                 f"{programm_xml}<title>{html.escape(programm['title'] or '')}</title>"
@@ -246,15 +244,6 @@ def programms_to_xmltv(programms):
         if "sub_title" in programm:
             programm_xml = f"{programm_xml}<sub-title>{html.escape(programm['sub_title'] or '')}</sub-title>"
 
-        if "country" in programm:
-            programm_xml = f"{programm_xml}<country>{html.escape(programm['country'] or '')}</country>"
-
-        if "category" in programm:
-            programm_xml = f"{programm_xml}<category lang=\"de\">{html.escape(programm['category'] or '')}</category>"
-
-        if "categories" in programm:
-            for category in programm["categories"]:
-                programm_xml = f"{programm_xml}<category lang=\"de\">{html.escape(category or '')}</category>"
 
         if "desc" in programm:
             programm_xml = f"{programm_xml}<desc lang=\"de\">{html.escape(programm['desc'] or '')}</desc>"
@@ -269,17 +258,31 @@ def programms_to_xmltv(programms):
                     programm_xml = f"{programm_xml}<{attrib}>{programm['persons'][attrib]}</{attrib}>"
             programm_xml = f"{programm_xml}</credits>"
 
+        if "date" in programm:
+            programm_xml = f"{programm_xml}<date>{str(programm['date'])}</date>"
+
+        if "category" in programm:
+            programm_xml = f"{programm_xml}<category lang=\"de\">{html.escape(programm['category'] or '')}</category>"
+
+        if "categories" in programm:
+            for category in programm["categories"]:
+                programm_xml = f"{programm_xml}<category lang=\"de\">{html.escape(category or '')}</category>"
+
+        if "duration" in programm:
+            programm_xml = f"{programm_xml}<length units=\"seconds\">{str(int(programm['duration']))}</length>"
+
+        if "icon" in programm and programm["icon"] != "":
+            programm_xml = f"{programm_xml}<icon src=\"{programm['icon']}\" />"
+
+        if "country" in programm:
+            programm_xml = f"{programm_xml}<country>{html.escape(programm['country'] or '')}</country>"
+
         if "episode_num" in programm:
             if "episode_num_system" in programm:
                 programm_xml = f"{programm_xml}<episode-num system=\"{programm['episode_num_system']}\">{programm['episode_num']}</episode-num>"
             else:
                 programm_xml = f"{programm_xml}<episode-num system=\"onscreen\">{programm['episode_num']}</episode-num>"
 
-        if "date" in programm:
-            programm_xml = f"{programm_xml}<date>{str(programm['date'])}</date>"
-
-        if "duration" in programm:
-            programm_xml = f"{programm_xml}<length units=\"seconds\">{str(int(programm['duration']))}</length>"
 
         programm_xml = f"{programm_xml}</programme>"
         programms_xml = programms_xml + programm_xml
