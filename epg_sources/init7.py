@@ -14,23 +14,9 @@ class init7:
     def get_epg(self, max_past, max_future):
         limit = 250
         offset = 0
-        data = self.__download__(limit, offset)
         start_time = datetime.now(pytz.UTC) - timedelta(seconds=max_past)
         end_time = datetime.now(pytz.UTC) + timedelta(seconds=max_future)
 
-        # Searching for right timeframe
-        offset = int(data["count"] / 2)
-        while True:
-            search_resp = self.__download__(limit, offset)
-            first_entry = search_resp["results"][0]
-            entry_start = dateutil.parser.parse(first_entry["timeslot"]["lower"])
-            if entry_start < start_time or offset == 0:
-                delta = entry_start - start_time
-                if delta.seconds > max_past or offset == 0:
-                    break
-            offset = int(offset / 2)
-
-        print("[*] Found proper offset. Start downloading from offset " + str(offset))
         epg_data = []
         while True:
             print("[*] Downloading from offset " + str(offset))
@@ -74,9 +60,6 @@ class init7:
                     item_epg["country"] = item["country"]
 
                 epg_data.append(item_epg)
-
-            if offset > 5000:
-                break
 
             if len(download_resp["results"]) == 0:
                 print("[*] No more data")
