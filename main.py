@@ -65,22 +65,22 @@ def __main__():
     channels_xmltv = channels_to_xmltv(channels)
 
     # generate tv7_teleboy_epg.xml
-    with open("tv7_teleboy_epg.xml", "w+") as w:
-        if len(teleboy_epg) > 0:
+    if len(teleboy_epg) > 0:
+        with open("tv7_teleboy_epg.xml", "w+") as w:
             w.write(
                 '<?xml version="1.0" encoding="UTF-8" ?><tv>'
                 f"{channels_xmltv}{programms_to_xmltv(teleboy_epg)}</tv>"
             )
 
-    with open("tv7_teleboy_epg_past.xml", "w+") as w:
-        if len(teleboy_epg_past) > 0:
+    if len(teleboy_epg_past) > 0:
+        with open("tv7_teleboy_epg_past.xml", "w+") as w:
             w.write(
                 '<?xml version="1.0" encoding="UTF-8" ?><tv>'
                 f"{channels_xmltv}{programms_to_xmltv(teleboy_epg_past)}</tv>"
             )
 
-    with open("tv7_init7_epg.xml", "w+") as w:
-        if len(init7_epg) > 0:
+    if len(init7_epg) > 0:
+        with open("tv7_init7_epg.xml", "w+") as w:
             w.write(
                 '<?xml version="1.0" encoding="UTF-8" ?><tv>'
                 f"{channels_xmltv}{programms_to_xmltv(init7_epg)}</tv>"
@@ -93,11 +93,12 @@ def __main__():
     full_epg.extend(init7_epg)
 
     programms_xmltv = programms_to_xmltv(full_epg)
-    with open("tv7_epg.xml", "w+") as w:
-        w.write(
-            '<?xml version="1.0" encoding="UTF-8" ?><tv>'
-            f"{channels_xmltv}{programms_xmltv}</tv>"
-        )
+    if len(full_epg) > 0:
+        with open("tv7_epg.xml", "w+") as w:
+            w.write(
+                '<?xml version="1.0" encoding="UTF-8" ?><tv>'
+                f"{channels_xmltv}{programms_xmltv}</tv>"
+            )
 
 
 def get_channel_list():
@@ -243,7 +244,6 @@ def programms_to_xmltv(programms):
         if "sub_title" in programm:
             programm_xml = f"{programm_xml}<sub-title>{html.escape(programm['sub_title'] or '')}</sub-title>"
 
-
         if "desc" in programm:
             programm_xml = f"{programm_xml}<desc lang=\"de\">{html.escape(programm['desc'] or '')}</desc>"
 
@@ -281,7 +281,6 @@ def programms_to_xmltv(programms):
                 programm_xml = f"{programm_xml}<episode-num system=\"{programm['episode_num_system']}\">{programm['episode_num']}</episode-num>"
             else:
                 programm_xml = f"{programm_xml}<episode-num system=\"onscreen\">{programm['episode_num']}</episode-num>"
-
 
         programm_xml = f"{programm_xml}</programme>"
         programms_xml = programms_xml + programm_xml
