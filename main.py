@@ -140,7 +140,6 @@ def gen_channel_id_from_name(channel_name):
         channel_name.lower()
         .replace("hd", "")
         .replace("schweiz", "")
-        .replace("ch", "")
         .replace("(", "")
         .replace(")", "")
         .replace(" ", "")
