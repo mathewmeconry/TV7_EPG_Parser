@@ -6,7 +6,10 @@ import dateutil.parser
 
 
 class init7:
-    __api__ = "https://tv7api2.tv.init7.net/api/epg/"
+    __apis__ = [
+        "https://api.tv.init7.net/api/epg/",
+        "https://tv7api2.tv.init7.net/api/epg/",
+    ]
 
     def __init__(self):
         self.sess = Session()
@@ -75,8 +78,18 @@ class init7:
 
         return epg_data
 
-    def __download__(self, limit, offset):
-        resp = self.sess.get(
-            self.__api__ + "?limit=" + str(limit) + "&offset=" + str(offset)
-        )
-        return resp.json()
+    def __download__(self, limit, offset, api_index=0):
+        try:
+            resp = self.sess.get(
+                self.__apis__[api_index]
+                + "?limit="
+                + str(limit)
+                + "&offset="
+                + str(offset)
+            )
+            return resp.json()
+        except Exception as e:
+            if api_index < len(self.__apis__) - 1:
+                return self.__download__(limit, offset, api_index + 1)
+            else:
+                raise e
