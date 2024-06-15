@@ -6,6 +6,7 @@ import html
 import json
 from epg_sources.teleboy import teleboy
 from epg_sources.init7 import init7
+import validators
 
 
 class channel_item:
@@ -270,7 +271,11 @@ def programms_to_xmltv(programms):
         if "duration" in programm:
             programm_xml = f"{programm_xml}<length units=\"seconds\">{str(int(programm['duration']))}</length>"
 
-        if "icon" in programm and programm["icon"] != "":
+        if (
+            "icon" in programm
+            and programm["icon"] != ""
+            and validators.url(programm["icon"])
+        ):
             programm_xml = f"{programm_xml}<icon src=\"{programm['icon']}\" />"
 
         if "country" in programm:
