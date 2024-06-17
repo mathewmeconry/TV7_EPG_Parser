@@ -60,7 +60,7 @@ slither-analyzer==0.9.3
 solc-select==1.0.3
 soupsieve==2.4
 toolz==0.12.0
-urllib3==2.2.1
+urllib3==2.2.2
 validators==0.28.3
 wcwidth==0.2.6
 web3==6.3.0
