@@ -4,7 +4,7 @@ async-timeout==4.0.2
 beautifulsoup4==4.12.2
 bitarray==2.7.3
 cbor2==5.4.6
-certifi==2024.2.2
+certifi==2024.7.4
 cfscrape==2.1.1
 charset-normalizer==3.1.0
 contourpy==1.2.1
