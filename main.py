@@ -276,7 +276,7 @@ def programms_to_xmltv(programms):
             and programm["icon"] != ""
             and validators.url(programm["icon"])
         ):
-            programm_xml = f"{programm_xml}<icon src=\"{programm['icon']}\" />"
+            programm_xml = f"{programm_xml}<icon src=\"{re.sub(r'&(?!amp;)', '&amp;', programm['icon'])}\" />"
 
         if "country" in programm:
             programm_xml = f"{programm_xml}<country>{html.escape(programm['country'] or '')}</country>"
@@ -305,7 +305,7 @@ def channels_to_xmltv(channel_list):
         )
 
         if "icon" in channel:
-            channel_xml = f"{channel_xml}<icon src=\"{channel['icon']}\" />"
+            channel_xml = f"{channel_xml}<icon src=\"{re.sub(r'&(?!amp;)', '&amp;', channel['icon'])}\" />"
 
         channel_xml = f"{channel_xml}</channel>"
         channels_xml = channels_xml + channel_xml
