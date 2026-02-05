@@ -42,6 +42,7 @@ def __main__():
     try:
         init7_epg_raw = init7Obj.get_epg(7 * 24 * 60 * 60, 7 * 24 * 60 * 60)
         init7_epg = match_init7_epg(channels, init7_epg_raw)
+        init7_epg = deduplicate_programms(init7_epg)
     except:
         print("[*] Failed. Continue processing other sources.")
 
@@ -53,6 +54,7 @@ def __main__():
     except:
         print("[*] Failed. Continue processing other sources.")
     teleboy_epg_past = match_teleboy_epg(channels, teleboy_raw)
+    teleboy_epg_past = deduplicate_programms(teleboy_epg_past)
 
     print("[*] Getting EPG data from teleboy.ch")
     teleboy_raw = ""
@@ -61,6 +63,7 @@ def __main__():
     except:
         print("[*] Failed. Continue processing other sources.")
     teleboy_epg = match_teleboy_epg(channels, teleboy_raw)
+    teleboy_epg = deduplicate_programms(teleboy_epg)
 
     # generate the xml for the channels
     channels_xmltv = channels_to_xmltv(channels)
@@ -92,6 +95,7 @@ def __main__():
     full_epg.extend(teleboy_epg)
     full_epg.extend(teleboy_epg_past)
     full_epg.extend(init7_epg)
+    full_epg = deduplicate_programms(full_epg)
 
     programms_xmltv = programms_to_xmltv(full_epg)
     if len(full_epg) > 0:
@@ -315,5 +319,16 @@ def channels_to_xmltv(channel_list):
 
     return channels_xml
 
+
+def deduplicate_programms(programms):
+    seen = set()
+    unique_programms = []
+    for programm in programms:
+        identifier = (programm["start"].timestamp(), programm["stop"].timestamp(), gen_channel_id_from_name(programm['channel']))
+        if identifier not in seen:
+            seen.add(identifier)
+            unique_programms.append(programm)
+    print("Deduplicated from ", len(programms), "to", len(unique_programms))
+    return unique_programms
 
 __main__()
