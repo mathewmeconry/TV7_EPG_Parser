@@ -257,8 +257,11 @@ def programms_to_xmltv(programms):
                 f"{programm_xml}<title>{html.escape(programm['title'] or '')}</title>"
             )
 
-        if "sub_title" in programm:
-            programm_xml = f"{programm_xml}<sub-title>{html.escape(programm['sub_title'] or '')}</sub-title>"
+        # fall back to the title as subtitle so players like Jellyfin can
+        # distinguish individual episodes of recurring programmes
+        sub_title = programm.get("sub_title") or programm.get("title")
+        if sub_title:
+            programm_xml = f"{programm_xml}<sub-title>{html.escape(sub_title)}</sub-title>"
 
         if "desc" in programm:
             programm_xml = f"{programm_xml}<desc lang=\"de\">{html.escape(programm['desc'] or '')}</desc>"
