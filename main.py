@@ -233,6 +233,14 @@ def match_teleboy_epg(channel_list, teleboy_epg):
     return programms
 
 
+def has_series_category(programm):
+    categories = []
+    if programm.get("categories"):
+        categories.extend(programm["categories"])
+    if programm.get("category"):
+        categories.append(programm["category"])
+    return any(str(category).strip().lower() == "series" for category in categories)
+
 def programms_to_xmltv(programms):
     print(f"[*] Generating XML for {str(len(programms))} programms")
     programms_xml = ""
@@ -288,11 +296,16 @@ def programms_to_xmltv(programms):
         if "country" in programm:
             programm_xml = f"{programm_xml}<country>{html.escape(programm['country'] or '')}</country>"
 
-        if "episode_num" in programm:
-            if "episode_num_system" in programm:
+        if programm.get("episode_num"):
+            if programm.get("episode_num_system"):
                 programm_xml = f"{programm_xml}<episode-num system=\"{programm['episode_num_system']}\">{programm['episode_num']}</episode-num>"
             else:
                 programm_xml = f"{programm_xml}<episode-num system=\"onscreen\">{programm['episode_num']}</episode-num>"
+        elif has_series_category(programm):
+            # mark series without an episode number (e.g. daily shows) as
+            # episodes by original-air-date so players like Plex treat them
+            # as series (allowing series recordings) instead of movies
+            programm_xml = f"{programm_xml}<episode-num system=\"original-air-date\">{programm['start'].strftime('%Y-%m-%d %H:%M:%S')}</episode-num>"
 
         programm_xml = f"{programm_xml}</programme>"
         programms_xml = programms_xml + programm_xml
