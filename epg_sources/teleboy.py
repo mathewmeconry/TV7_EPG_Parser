@@ -1,6 +1,7 @@
 import datetime
 import dateutil.parser
 import math
+import os
 import pytz
 from typing import Dict
 from requests import Session
@@ -34,8 +35,12 @@ class teleboy:
         self.max_duration = 20
         # the API only returns a maximum of 300 items per request
         self.page_limit = 300
-        # the API interprets naive begin/end times in the server timezone
-        self.tz = pytz.timezone("Europe/Zurich")
+        # the API interprets the wall-clock part of begin/end in the
+        # server's timezone and ignores any provided offset, so requests
+        # are converted to the server timezone before being sent; the
+        # server timezone is configurable via TELEBOY_SERVER_TZ (IANA
+        # name, e.g. "America/New_York") in case the API moves
+        self.tz = pytz.timezone(os.environ.get("TELEBOY_SERVER_TZ", "Europe/Zurich"))
 
 
     def get_epg_by_time(self, start_time: datetime.datetime = None, duration: int = None,
@@ -43,6 +48,10 @@ class teleboy:
         if not start_time:
             start_time = datetime.datetime.now(self.tz)
 
+        if start_time.tzinfo is None:
+            # treat naive start times as UTC so the machine's local
+            # timezone cannot leak in via astimezone()
+            start_time = pytz.UTC.localize(start_time)
         if not duration:
             duration = self.max_duration
 
